@@ -6,15 +6,20 @@
 package MiddlewareServer.Common;
 
 import MiddlewareServer.Interface.*;
+import Server.Common.*;
 
+
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 import java.rmi.RemoteException;
-import java.io.*;
+import java.rmi.NotBoundException;
 
 public class ResourceManager implements IResourceManager
 {
 	protected String m_name = "";
 	protected RMHashMap m_data = new RMHashMap();
+    private static String s_rmiPrefix = "group15";
 
     private static String s_serverHost_f = "localhost";
     private static int s_serverPort_f = 1099;
