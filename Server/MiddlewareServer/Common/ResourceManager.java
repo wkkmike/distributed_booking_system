@@ -239,6 +239,15 @@ public class ResourceManager implements IResourceManager
 	// Reserve bundle 
 	public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException
 	{
+        for(String flightNumber: flightNumbers){
+            reserveFlight(xid, customerId, Integer.parseInt(flightNumber));
+        }
+        if(car){
+            reserveCar(xid, customerId, location);
+        }
+        if(room){
+            reserveRoom(xid, customerId, location);
+        }
 		return false;
 	}
 
