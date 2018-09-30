@@ -1,6 +1,6 @@
 package Client;
 
-import Server.Interface.*;
+import MiddlewareServer.Interface.*;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
