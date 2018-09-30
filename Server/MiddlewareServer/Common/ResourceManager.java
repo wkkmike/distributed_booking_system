@@ -35,7 +35,7 @@ public class ResourceManager implements IResourceManager
 
 	private static String s_serverHost_cus = "localhost";
 	private static int s_serverPort_cus = 1099;
-	private static String s_serverName_cus = "customers";
+	private static String s_serverName_cus = "Customers";
 
 	public ResourceManager(String p_name)
 	{
