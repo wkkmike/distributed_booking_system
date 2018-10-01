@@ -8,9 +8,6 @@ package MiddlewareServer.RMI;
 import Server.Interface.*;
 import MiddlewareServer.Common.*;
 
-import java.rmi.NotBoundException;
-import java.util.*;
-
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
@@ -22,39 +19,43 @@ public class RMIResourceManager extends ResourceManager
 	private static String s_rmiPrefix = "group15";
 
 
-	private static String s_serverHost_f = "localhost";
-	private static int s_serverPort_f = 1099;
-	private static String s_serverName_f = "Flights";
+	private static String s_serverHost_Flight = "localhost";
+	private static int s_serverPort_Flight = 1099;
+	private static String s_serverName_Flight = "Flights";
 
-	private static String s_serverHost_c = "localhost";
-	private static int s_serverPort_c = 1099;
-	private static String s_serverName_c = "Cars";
+	private static String s_serverHost_Car = "localhost";
+	private static int s_serverPort_Car = 1099;
+	private static String s_serverName_Car = "Cars";
 
-	private static String s_serverHost_r = "localhost";
-	private static int s_serverPort_r = 1099;
-	private static String s_serverName_r = "Rooms";
+	private static String s_serverHost_Room = "localhost";
+	private static int s_serverPort_Room = 1099;
+	private static String s_serverName_Room = "Rooms";
 
-	private static String s_serverHost_cus = "localhost";
-	private static int s_serverPort_cus = 1099;
-	private static String s_serverName_cus = "Customers";
+	private static String s_serverHost_Customer = "localhost";
+	private static int s_serverPort_Customer = 1099;
+	private static String s_serverName_Customer = "Customers";
 
 	public static void main(String args[])
 	{
-		if (args.length > 0)
+		if(args.length > 0)
 		{
-			s_serverHost_c = args[0];
+			s_serverHost_Flight = args[0];
 		}
 
-		if (args.length > 1)
+		if(args.length > 1)
 		{
-			s_serverHost_c = args[1];
+			s_serverHost_Car = args[1];
 		}
 
-		if (args.length > 2)
+		if(args.length > 2)
 		{
-			s_serverHost_c = args[2];
+			s_serverHost_Room = args[2];
 		}
 
+		if(args.length > 3)
+		{
+			s_serverHost_Customer = args[3];
+		}
 		// Create the RMI server entry
 		// Create a new Server object
 		RMIResourceManager server = new RMIResourceManager(s_serverName);
@@ -120,10 +121,10 @@ public class RMIResourceManager extends ResourceManager
 			System.setSecurityManager(new SecurityManager());
 		}
 		try {
-			m_resourceManager_f = connectServer(s_serverHost_f, s_serverPort_f, s_serverName_f);
-			m_resourceManager_c = connectServer(s_serverHost_c, s_serverPort_c, s_serverName_c);
-			m_resourceManager_r = connectServer(s_serverHost_r, s_serverPort_r, s_serverName_r);
-			m_resourceManager_cus = connectServer(s_serverHost_cus, s_serverPort_cus, s_serverName_cus);
+			m_resourceManager_f = connectServer(s_serverHost_Flight, s_serverPort_Flight, s_serverName_Flight);
+			m_resourceManager_c = connectServer(s_serverHost_Car, s_serverPort_Car, s_serverName_Car);
+			m_resourceManager_r = connectServer(s_serverHost_Room, s_serverPort_Room, s_serverName_Room);
+			m_resourceManager_cus = connectServer(s_serverHost_Customer, s_serverPort_Customer, s_serverName_Customer);
 		}
 		catch (Exception e) {
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
