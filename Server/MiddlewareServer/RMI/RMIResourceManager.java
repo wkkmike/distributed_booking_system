@@ -21,6 +21,7 @@ public class RMIResourceManager extends ResourceManager
 	private static String s_serverName = "MiddlewareServer";
 	private static String s_rmiPrefix = "group15";
 
+
 	private static String s_serverHost_f = "localhost";
 	private static int s_serverPort_f = 1099;
 	private static String s_serverName_f = "Flights";
@@ -41,16 +42,25 @@ public class RMIResourceManager extends ResourceManager
 	{
 		if (args.length > 0)
 		{
-			s_serverName = args[0];
+			s_serverHost_c = args[0];
 		}
 
-		// Create a new Middleware object
-		RMIResourceManager middleware = new RMIResourceManager(s_serverName);
+		if (args.length > 1)
+		{
+			s_serverHost_c = args[1];
+		}
+
+		if (args.length > 2)
+		{
+			s_serverHost_c = args[2];
+		}
 
 		// Create the RMI server entry
+		// Create a new Server object
+		RMIResourceManager server = new RMIResourceManager(s_serverName);
 		try {
 			// Dynamically generate the stub (client proxy)
-			IResourceManager resourceManager = (IResourceManager)UnicastRemoteObject.exportObject(middleware, 0);
+			IResourceManager resourceManager = (IResourceManager)UnicastRemoteObject.exportObject(server, 0);
 
 			// Bind the remote object's stub in the registry
 			Registry l_registry;
@@ -88,9 +98,8 @@ public class RMIResourceManager extends ResourceManager
 			System.setSecurityManager(new SecurityManager());
 		}
 
-		// Get a reference to the RMIRegister
 		try {
-			middleware.connectServer(s_serverHost_r, s_serverPort_r);
+			server.connect();
 		}
 		catch (Exception e) {
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
@@ -99,41 +108,28 @@ public class RMIResourceManager extends ResourceManager
 		}
 	}
 
-	public void connectServer(String server, int port)
-	{
-		try {
-			boolean first = true;
-			while (true) {
-				try {
-					Registry flightRegistry = LocateRegistry.getRegistry(s_serverHost_f, s_serverPort_f);
-					Registry carRegistry = LocateRegistry.getRegistry(s_serverHost_c, s_serverPort_c);
-					Registry roomRegistry = LocateRegistry.getRegistry(s_serverHost_r, s_serverPort_r);
-					Registry customerRegistry = LocateRegistry.getRegistry(s_serverHost_cus, s_serverPort_cus);
-					m_resourceManager_f = (IResourceManager) flightRegistry.lookup(s_rmiPrefix + s_serverName_f);
-					m_resourceManager_c = (IResourceManager) carRegistry.lookup(s_rmiPrefix + s_serverName_c);
-					m_resourceManager_r = (IResourceManager) roomRegistry.lookup(s_rmiPrefix + s_serverName_r);
-					m_resourceManager_cus = (IResourceManager) customerRegistry.lookup(s_rmiPrefix + s_serverName_cus);
-					System.out.println("Connected to 'All" + "' server [" + server + ":" + port + "/" + s_rmiPrefix + "]");
-					break;
-				}
-				catch (NotBoundException|RemoteException e) {
-					if (first) {
-						System.out.println("Waiting for 'some" + "' server [" + server + ":" + port + "/" + s_rmiPrefix + "]");
-						first = false;
-					}
-				}
-				Thread.sleep(500);
-			}
-		}
-		catch (Exception e) {
-			System.err.println((char)27 + "[31;1mServer exception: " + (char)27 + "[0mUncaught exception");
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
-
 	public RMIResourceManager(String name)
 	{
 		super(name);
+	}
+
+
+	public boolean connect(){
+		if (System.getSecurityManager() == null)
+		{
+			System.setSecurityManager(new SecurityManager());
+		}
+		try {
+			m_resourceManager_f = connectServer(s_serverHost_f, s_serverPort_f, s_serverName_f);
+			m_resourceManager_c = connectServer(s_serverHost_c, s_serverPort_c, s_serverName_c);
+			m_resourceManager_r = connectServer(s_serverHost_r, s_serverPort_r, s_serverName_r);
+			m_resourceManager_cus = connectServer(s_serverHost_cus, s_serverPort_cus, s_serverName_cus);
+		}
+		catch (Exception e) {
+			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return true;
 	}
 }
