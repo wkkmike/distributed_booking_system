@@ -1,4 +1,5 @@
-./run_server.sh Flights &
-./run_server.sh Rooms &
-./run_server.sh Cars &
-./run_server.sh Customers &
+./run_rmi.sh > /dev/null 2>&1
+java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ Server.RMI.RMIResourceManager Flights &
+java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ Server.RMI.RMIResourceManager Rooms &
+java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ Server.RMI.RMIResourceManager Cars &
+java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ Server.RMI.RMIResourceManager Customers &

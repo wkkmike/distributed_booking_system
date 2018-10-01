@@ -1,6 +1,6 @@
 package Client;
 
-import MiddlewareServer.Interface.*;
+import Server.Interface.*;
 
 import java.util.*;
 import java.io.*;

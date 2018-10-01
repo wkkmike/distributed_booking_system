@@ -5,4 +5,4 @@ echo '  $1 - hostname of Flights'
 echo '  $2 - hostname of Cars'
 echo '  $3 - hostname of Rooms'
 
-java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ MiddlewareServer.RMI.RMIResourceManager
+java -Djava.security.policy=java.policy -Djava.rmi.server.codebase=file:$(pwd)/ MiddlewareServer.RMI.RMIResourceManager $1

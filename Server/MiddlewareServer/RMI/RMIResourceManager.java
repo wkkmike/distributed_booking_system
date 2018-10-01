@@ -5,7 +5,7 @@
 
 package MiddlewareServer.RMI;
 
-import MiddlewareServer.Interface.*;
+import Server.Interface.*;
 import MiddlewareServer.Common.*;
 
 import java.rmi.NotBoundException;
@@ -19,7 +19,6 @@ import java.rmi.server.UnicastRemoteObject;
 public class RMIResourceManager extends ResourceManager
 {
 	private static String s_serverName = "MiddlewareServer";
-	//TODO: REPLACE 'ALEX' WITH YOUR GROUP NUMBER TO COMPILE
 	private static String s_rmiPrefix = "group15";
 
 	public static void main(String args[])

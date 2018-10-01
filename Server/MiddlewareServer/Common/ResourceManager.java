@@ -5,7 +5,7 @@
 
 package MiddlewareServer.Common;
 
-import MiddlewareServer.Interface.*;
+import Server.Interface.*;
 import Server.Common.*;
 
 
@@ -42,7 +42,7 @@ public class ResourceManager implements IResourceManager
 		m_name = p_name;
 	}
 
-    IResourceManager m_resourceManager_f = null;
+	IResourceManager m_resourceManager_f = null;
 	IResourceManager m_resourceManager_c = null;
 	IResourceManager m_resourceManager_r = null;
 	IResourceManager m_resourceManager_cus = null;
@@ -78,7 +78,7 @@ public class ResourceManager implements IResourceManager
             while (true) {
                 try {
                     Registry registry = LocateRegistry.getRegistry(server, port);
-                    m_resourceManager = (IResourceManager)registry.lookup(s_rmiPrefix + name);
+                    m_resourceManager = (IResourceManager) registry.lookup(s_rmiPrefix + name);
                     System.out.println("Connected to '" + name + "' server [" + server + ":" + port + "/" + s_rmiPrefix + name + "]");
                     break;
                 }
