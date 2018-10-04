@@ -149,16 +149,25 @@ public class ResourceManager implements IResourceManager
 
 	public int newCustomer(int xid) throws RemoteException
 	{
+		m_resourceManager_c.newCustomer(xid);
+		m_resourceManager_f.newCustomer(xid);
+		m_resourceManager_r.newCustomer(xid);
 		return m_resourceManager_cus.newCustomer(xid);
 	}
 
 	public boolean newCustomer(int xid, int customerID) throws RemoteException
 	{
+		m_resourceManager_c.newCustomer(xid, customerID);
+		m_resourceManager_f.newCustomer(xid, customerID);
+		m_resourceManager_r.newCustomer(xid, customerID);
 		return m_resourceManager_cus.newCustomer(xid,customerID);
 	}
 
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException
 	{
+		m_resourceManager_c.deleteCustomer(xid, customerID);
+		m_resourceManager_f.deleteCustomer(xid, customerID);
+		m_resourceManager_r.deleteCustomer(xid, customerID);
 		Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
 		return m_resourceManager_cus.deleteCustomer(xid,customerID);
 	}
