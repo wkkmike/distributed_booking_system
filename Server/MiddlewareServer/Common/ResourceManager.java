@@ -149,25 +149,16 @@ public class ResourceManager implements IResourceManager
 
 	public int newCustomer(int xid) throws RemoteException
 	{
-		m_resourceManager_c.newCustomer(xid);
-		m_resourceManager_f.newCustomer(xid);
-		m_resourceManager_r.newCustomer(xid);
 		return m_resourceManager_cus.newCustomer(xid);
 	}
 
 	public boolean newCustomer(int xid, int customerID) throws RemoteException
 	{
-		m_resourceManager_c.newCustomer(xid, customerID);
-		m_resourceManager_f.newCustomer(xid, customerID);
-		m_resourceManager_r.newCustomer(xid, customerID);
 		return m_resourceManager_cus.newCustomer(xid,customerID);
 	}
 
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException
 	{
-		m_resourceManager_c.deleteCustomer(xid, customerID);
-		m_resourceManager_f.deleteCustomer(xid, customerID);
-		m_resourceManager_r.deleteCustomer(xid, customerID);
 		Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
 		return m_resourceManager_cus.deleteCustomer(xid,customerID);
 	}
@@ -175,19 +166,65 @@ public class ResourceManager implements IResourceManager
 	// Adds flight reservation to this customer
 	public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException
 	{
-		return m_resourceManager_f.reserveFlight(xid, customerID, flightNum);
+		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
+			return false;
+		if(!m_resourceManager_f.reserveFlight(xid, customerID, flightNum))
+			return false;
+		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_f.getFlightKey(xid, flightNum),
+				String.valueOf(flightNum), m_resourceManager_f.queryFlightPrice(xid, flightNum)))
+			return false;
+		return true;
 	}
 
 	// Adds car reservation to this customer
 	public boolean reserveCar(int xid, int customerID, String location) throws RemoteException
 	{
-		return m_resourceManager_c.reserveCar(xid, customerID, location);
+		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
+			return false;
+		if(!m_resourceManager_c.reserveCar(xid, customerID, location))
+			return false;
+		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_c.getCarKey(xid, location),
+				location, m_resourceManager_f.queryCarsPrice(xid, location)))
+			return false;
+		return true;
 	}
 
 	// Adds room reservation to this customer
 	public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException
 	{
-		return m_resourceManager_r.reserveRoom(xid, customerID, location);
+		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
+			return false;
+		if(!m_resourceManager_r.reserveRoom(xid, customerID, location))
+			return false;
+		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_r.getRoomKey(xid, location),
+				location, m_resourceManager_r.queryRoomsPrice(xid, location)))
+			return false;
+		return true;
+	}
+
+	@Override
+	public boolean checkCustomer(int xid, int customerID) throws RemoteException {
+		return false;
+	}
+
+	@Override
+	public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price) throws RemoteException {
+		return false;
+	}
+
+	@Override
+	public String getFlightKey(int xid, int number) throws RemoteException {
+		return null;
+	}
+
+	@Override
+	public String getCarKey(int xid, String location) throws RemoteException {
+		return null;
+	}
+
+	@Override
+	public String getRoomKey(int xid, String location) throws RemoteException {
+		return null;
 	}
 
 	// Reserve bundle 

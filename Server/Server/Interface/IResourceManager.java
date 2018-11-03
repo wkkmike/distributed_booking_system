@@ -1,5 +1,7 @@
 package Server.Interface;
 
+import Server.Common.ReservableItem;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -191,7 +193,27 @@ public interface IResourceManager extends Remote
      * @return Success
      */
     public boolean reserveRoom(int id, int customerID, String location) 
-	throws RemoteException; 
+	throws RemoteException;
+
+    // Check the existens of a customer. Only used by customer server
+    public boolean checkCustomer(int xid, int customerID)
+    throws RemoteException;
+
+    // Reserve an item fro customer server.
+    public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price)
+    throws RemoteException;
+
+    // Return key for flight
+    public String getFlightKey(int xid, int number)
+    throws RemoteException;
+
+    // Return key for car
+    public String getCarKey(int xid, String location)
+    throws RemoteException;
+
+    // Return key for room
+    public String getRoomKey(int xid, String location)
+    throws RemoteException;
 
     /**
      * Reserve a bundle for the trip.

@@ -104,18 +104,52 @@ public class ResourceManager implements IResourceManager
 		return value;        
 	}
 
+	// Check the existens of a customer. Only used by customer server
+	public boolean checkCustomer(int xid, int customerID) throws RemoteException{
+		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
+		if(customer == null) return false;
+		return true;
+	}
+
+	// Reserve an item fro customer server.
+	public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price) throws RemoteException{
+		Customer customer = (Customer) readData(xid, Customer.getKey(customerID));
+		if(customer == null)
+			return false;
+		customer.reserve(key, location, price);
+		writeData(xid, customer.getKey(), customer);
+		return true;
+	}
+
+	// Return key of a Flight
+	public String getFlightKey(int xid, int number) throws RemoteException{
+		return Flight.getKey(number);
+	}
+
+	// Return key of a car
+	public String getCarKey(int xid, String location) throws RemoteException{
+		return Car.getKey(location);
+	}
+
+	// Return key of a room
+	public String getRoomKey(int xid, String location) throws RemoteException{
+		return Room.getKey(location);
+	}
+
 	// Reserve an item
 	protected boolean reserveItem(int xid, int customerID, String key, String location)
 	{
 		Trace.info("RM::reserveItem(" + xid + ", customer=" + customerID + ", " + key + ", " + location + ") called" );        
 		// Read customer object if it exists (and read lock it)
+
+		/*
 		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
 		if (customer == null)
 		{
 			Trace.warn("RM::reserveItem(" + xid + ", " + customerID + ", " + key + ", " + location + ")  failed--customer doesn't exist");
 			return false;
 		} 
-
+		*/
 		// Check if the item is available
 		ReservableItem item = (ReservableItem)readData(xid, key);
 		if (item == null)
@@ -130,9 +164,10 @@ public class ResourceManager implements IResourceManager
 		}
 		else
 		{            
-			customer.reserve(key, location, item.getPrice());        
+		/*
+			customer.reserve(key, location, item.getPrice());
 			writeData(xid, customer.getKey(), customer);
-
+		*/
 			// Decrease the number of available items in the storage
 			item.setCount(item.getCount() - 1);
 			item.setReserved(item.getReserved() + 1);
