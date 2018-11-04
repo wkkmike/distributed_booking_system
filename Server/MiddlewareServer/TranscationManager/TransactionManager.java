@@ -4,13 +4,20 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 public class TransactionManager {
-    List<Integer> transactionIdList = new ArrayList<Integer>();
-    public TransactionManager(){
+    private int xid;
+    List<Transaction> transactionIdList;
 
+    TransactionManager(){
+        xid = 0;
+        transactionIdList = new ArrayList<Transaction>();
     }
 
-    public int start() throws RemoteException{
-        return 0;
+    //assign xid upon request
+    public synchronized int start() throws RemoteException{
+        Transaction t = new Transaction(xid);
+        transactionIdList.add(t);
+        xid ++;
+        return (xid - 1);
     }
 
     public boolean commit(int transactionId) throws RemoteException,

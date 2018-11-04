@@ -1,7 +1,7 @@
 package MiddlewareServer.TranscationManager;
 import java.util.*;
 
-public class Transcation {
+public class Transaction {
 
     int transcationID;
     List<RM> RMList = new ArrayList<RM>();
@@ -13,11 +13,11 @@ public class Transcation {
         RM_R
     };
 
-    public Transcation(int xid){
+    public Transaction(int xid){
         transcationID = xid;
     }
 
-    public Transcation(int xid, List<RM> RMList){
+    public Transaction(int xid, List<RM> RMList){
         transcationID = xid;
         this.RMList = new ArrayList<RM>(RMList);
     }

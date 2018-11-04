@@ -251,6 +251,7 @@ public class LockManager
 						}
 					}
 					//TODO: Lock conversion
+					
 				}
 			} 
 			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ)
@@ -263,7 +264,7 @@ public class LockManager
 					return true;
 				}
 			}
-		       	else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE)
+			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE)
 			{
 				// Transaction is requesting a WRITE lock and some other transaction has either
 				// a READ or a WRITE lock on it ==> conflict
