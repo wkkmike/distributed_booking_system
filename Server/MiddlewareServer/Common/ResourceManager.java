@@ -5,6 +5,10 @@
 
 package MiddlewareServer.Common;
 
+import MiddlewareServer.Interface.IMiddleware;
+import MiddlewareServer.TranscationManager.InvalidTransactionException;
+import MiddlewareServer.TranscationManager.TransactionManager;
+import MiddlewareServer.TranscationManager.TranscationAbortedException;
 import Server.Interface.*;
 import Server.Common.*;
 
@@ -15,7 +19,7 @@ import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 
-public class ResourceManager implements IResourceManager
+public class ResourceManager implements IMiddleware
 {
 	protected String m_name = "";
 	protected RMHashMap m_data = new RMHashMap();
@@ -25,6 +29,7 @@ public class ResourceManager implements IResourceManager
 	public IResourceManager m_resourceManager_c = null;
 	public IResourceManager m_resourceManager_r = null;
 	public IResourceManager m_resourceManager_cus = null;
+	private TransactionManager TM = new TransactionManager();
 
 	public ResourceManager(String p_name)
 	{
@@ -66,8 +71,8 @@ public class ResourceManager implements IResourceManager
 	// NOTE: if flightPrice <= 0 and the flight already exists, it maintains its current price
 	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
 	{
+
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
-//		connect();
 		return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
 	}
 
@@ -202,31 +207,6 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
-	@Override
-	public boolean checkCustomer(int xid, int customerID) throws RemoteException {
-		return false;
-	}
-
-	@Override
-	public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price) throws RemoteException {
-		return false;
-	}
-
-	@Override
-	public String getFlightKey(int xid, int number) throws RemoteException {
-		return null;
-	}
-
-	@Override
-	public String getCarKey(int xid, String location) throws RemoteException {
-		return null;
-	}
-
-	@Override
-	public String getRoomKey(int xid, String location) throws RemoteException {
-		return null;
-	}
-
 	// Reserve bundle 
 	public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException
 	{
@@ -269,6 +249,26 @@ public class ResourceManager implements IResourceManager
 	public String getName() throws RemoteException
 	{
 		return m_name;
+	}
+
+	@Override
+	public int start() throws RemoteException {
+		return TM.start();
+	}
+
+	@Override
+	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException, InvalidTransactionException {
+		return TM.commit(transactionId);
+	}
+
+	@Override
+	public void abort(int transactionId) throws RemoteException, InvalidTransactionException {
+		TM.abort(transactionId);
+	}
+
+	@Override
+	public boolean shutdown() throws RemoteException {
+		return TM.shutdown();
 	}
 }
  

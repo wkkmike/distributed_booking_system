@@ -1,5 +1,8 @@
 package MiddlewareServer.Interface;
 
+import MiddlewareServer.TranscationManager.InvalidTransactionException;
+import MiddlewareServer.TranscationManager.TranscationAbortedException;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -208,4 +211,15 @@ public interface IMiddleware extends Remote
      */
     public String getName()
         throws RemoteException;
+
+    public int start()
+            throws RemoteException;
+
+    public boolean commit(int transactionId)
+            throws RemoteException, TranscationAbortedException, InvalidTransactionException;
+
+    public void abort(int transactionId)
+            throws RemoteException,InvalidTransactionException;
+
+    public boolean shutdown() throws RemoteException;
 }

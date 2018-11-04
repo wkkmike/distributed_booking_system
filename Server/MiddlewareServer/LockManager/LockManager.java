@@ -240,8 +240,10 @@ public class LockManager
 					}
 
 					else{
+						// The transaction only have a read lock now, need to check whether other transaction have a read lock.
 						for (int j=0; j<size; j++){
 							DataLockObject t_dataLockObject = (DataLockObject)vect.elementAt(j);
+							// If other transaction have a read lock.
 							if (dataLockObject.getXId() != t_dataLockObject.getXId()){
 								Trace.info("LM::lockConflict(" + dataLockObject.getXId() + ", " + dataLockObject.getDataName() + ") Want convert to" +
 										" WRITE, someone has READ");
@@ -250,8 +252,7 @@ public class LockManager
 							}
 						}
 					}
-					//TODO: Lock conversion
-					
+					//TODO: Lock conversion, maybe deadlock
 				}
 			} 
 			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ)

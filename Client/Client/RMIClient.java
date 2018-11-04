@@ -1,5 +1,6 @@
 package Client;
 
+import MiddlewareServer.Interface.IMiddleware;
 import Server.Interface.*;
 
 import java.rmi.registry.LocateRegistry;
@@ -66,7 +67,7 @@ public class RMIClient extends Client
 			while (true) {
 				try {
 					Registry registry = LocateRegistry.getRegistry(server, port);
-					m_resourceManager = (IResourceManager)registry.lookup(s_rmiPrefix + name);
+					m_resourceManager = (IMiddleware)registry.lookup(s_rmiPrefix + name);
 					System.out.println("Connected to '" + name + "' server [" + server + ":" + port + "/" + s_rmiPrefix + name + "]");
 					break;
 				}

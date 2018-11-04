@@ -7,9 +7,9 @@ public class TransactionManager {
     private int xid;
     List<Transaction> transactionIdList;
 
-    TransactionManager(){
-        xid = 0;
-        transactionIdList = new ArrayList<Transaction>();
+    public TransactionManager(){
+        xid = 1;
+        transactionIdList = new LinkedList<Transaction>();
     }
 
     //assign xid upon request

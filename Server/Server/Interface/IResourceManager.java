@@ -1,5 +1,7 @@
 package Server.Interface;
 
+import MiddlewareServer.TranscationManager.InvalidTransactionException;
+import MiddlewareServer.TranscationManager.TranscationAbortedException;
 import Server.Common.ReservableItem;
 
 import java.rmi.Remote;
@@ -230,4 +232,5 @@ public interface IResourceManager extends Remote
      */
     public String getName()
         throws RemoteException;
+
 }

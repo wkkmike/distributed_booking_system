@@ -3,8 +3,10 @@ import java.util.*;
 
 public class Transaction {
 
-    int transcationID;
+    private int transcationID;
     List<RM> RMList = new ArrayList<RM>();
+    List<> redoOperations = new LinkedList();
+    private boolean aborted = false;
 
     public enum RM{
         RM_CUS,

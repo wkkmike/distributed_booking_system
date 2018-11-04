@@ -1,6 +1,7 @@
 package Client;
 
-import Server.Interface.*;
+import MiddlewareServer.Interface.IMiddleware;
+
 
 import java.util.*;
 import java.io.*;
@@ -11,7 +12,7 @@ import java.rmi.UnmarshalException;
 
 public abstract class Client
 {
-	IResourceManager m_resourceManager = null;
+	IMiddleware m_resourceManager = null;
 
 	public Client()
 	{
@@ -412,6 +413,22 @@ public abstract class Client
 					System.out.println("Bundle could not be reserved");
 				}
 				break;
+			}
+			case Start:{
+				checkArgumentsCount(1,arguments.size());
+				System.out.println("Start a new transaction.");
+				int xid = m_resourceManager.start();
+				System.out.println("Transaction ID is:" + xid);
+				break;
+			}
+			case Commit:{
+				checkArgumentsCount(2, arguments.size());
+				System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
+
+				int xid = toInt(arguments.elementAt(1));
+				try{
+					m_resourceManager.commit()
+				}
 			}
 			case Quit:
 				checkArgumentsCount(1, arguments.size());
