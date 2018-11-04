@@ -1,4 +1,4 @@
-package Server.LockManager;
+package MiddlewareServer.LockManager;
 
 public class TransactionLockObject extends TransactionObject
 {

@@ -1,4 +1,4 @@
-package Server.LockManager;
+package MiddlewareServer.LockManager;
 
 /* The transaction requested a lock that it already had. */ 
 

@@ -1,4 +1,4 @@
-package Server.LockManager;
+package MiddlewareServer.LockManager;
 
 import Server.Common.*;
 
@@ -63,8 +63,16 @@ public class LockManager
 						}
 
 						if (bConvert.get(0) == true) {
-							//TODO: Lock conversion 
-							// Trace.info("LM::lock(" + xid + ", " + data + ", " + lockType + ") converted");
+							//TODO: Lock conversion
+							TransactionLockObject xPreLock = new TransactionLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
+							DataLockObject dataPreLock = new DataLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
+							if(!this.lockTable.remove(xPreLock))
+								return false;
+							if(!this.lockTable.remove(dataPreLock))
+								return false;
+							this.lockTable.add(xLockObject);
+							this.lockTable.add(dataLockObject);
+							Trace.info("LM::lock(" + xid + ", " + data + ", " + lockType + ") converted");
 						} else {
 							// Lock request that is not lock conversion
 							this.lockTable.add(xLockObject);
@@ -226,7 +234,22 @@ public class LockManager
 					// (1) transaction already had a READ lock
 					// (2) transaction already had a WRITE lock
 					// Seeing the comments at the top of this function might be helpful
+					if (l_dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE){
+						// Since the transaction already have a write lock, no conversion needed.
+						throw new RedundantLockRequestException(dataLockObject.getXId(), "redundant READ lock request");
+					}
 
+					else{
+						for (int j=0; j<size; j++){
+							DataLockObject t_dataLockObject = (DataLockObject)vect.elementAt(j);
+							if (dataLockObject.getXId() != t_dataLockObject.getXId()){
+								Trace.info("LM::lockConflict(" + dataLockObject.getXId() + ", " + dataLockObject.getDataName() + ") Want convert to" +
+										" WRITE, someone has READ");
+								bitset.set(0);
+								return true;
+							}
+						}
+					}
 					//TODO: Lock conversion
 				}
 			} 
