@@ -246,7 +246,7 @@ public class LockManager
 								Trace.info("LM::lockConflict(" + dataLockObject.getXId() + ", " + dataLockObject.getDataName() + ") Want convert to" +
 										" WRITE, someone has READ");
 								bitset.set(0);
-								return true;
+								return false;
 							}
 						}
 					}
