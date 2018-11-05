@@ -75,7 +75,7 @@ public class ResourceManager implements IMiddleware
 
 	// Create a new flight, or add seats to existing flight
 	// NOTE: if flightPrice <= 0 and the flight already exists, it maintains its current price
-	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
+	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException, InvalidTransactionException
 	{
 
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
@@ -85,10 +85,12 @@ public class ResourceManager implements IMiddleware
 			}
 		}catch(DeadlockException de){
 			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") get deadlock, now going to abort this transaction");
+			throw
 			try {
 				TM.abort(xid);
 			}catch (InvalidTransactionException ie){
 				Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
+				throw new InvalidTransactionException(xid, "no such transaction");
 			}
 		}
 		return false;
