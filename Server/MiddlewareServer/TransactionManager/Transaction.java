@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import MiddlewareServer.Common.ResourceManager;
+import MiddlewareServer.LockManager.DeadlockException;
 import MiddlewareServer.LockManager.LockManager;
 
 public class Transaction {
@@ -145,6 +146,9 @@ public class Transaction {
                 System.out.println("RMI exception:" + e.getMessage());
                 System.out.println("MW:UndoOperation for xid:" + transcationID + " failed");
                 return false;
+            }
+            catch (DeadlockException|InvalidTransactionException e){
+                System.out.println("SOMETHING STRANGE HAPPENED!!!!!!");
             }
         }
         System.out.println("MW_Transaction:UndoOperation for xid:" + transcationID + " finished");
