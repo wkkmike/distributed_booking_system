@@ -110,18 +110,77 @@ public class ResourceManager implements IMiddleware
 
 	// Create a new car location or add cars to an existing location
 	// NOTE: if price <= 0 and the location already exists, it maintains its current price
-	public boolean addCars(int xid, String location, int count, int price) throws RemoteException
-	{
+	public boolean addCars(int xid, String location, int count, int price) throws RemoteException, InvalidTransactionException, DeadlockException {
 		Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
-		return  m_resourceManager_c.addCars(xid, location, count, price);
+		try{
+			//get write lock
+			if(LM.Lock(xid,"car-"+location,TransactionLockObject.LockType.LOCK_WRITE)){
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_C);
+				ReservableItem carNum = m_resourceManager_c.getCar(xid, location);
+				// No such car before, undo operation should delete this entry;
+				if(carNum == null)
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Car, location));
+					// Have such car, the add is actually a update operation. Undo operation reset the car.
+				else
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, carNum));
+				return m_resourceManager_c.addCars(xid, location, count, price);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ")  get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ")  is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+
+		return  false;
 	}
 
 	// Create a new room location or add rooms to an existing location
 	// NOTE: if price <= 0 and the room location already exists, it maintains its current price
-	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException
-	{
+	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException, InvalidTransactionException, DeadlockException {
 		Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
-		return m_resourceManager_r.addRooms(xid, location, count, price);
+
+		try{
+			//get write lock
+			if(LM.Lock(xid,"room-"+location,TransactionLockObject.LockType.LOCK_WRITE)){
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_R);
+				ReservableItem roomNum = m_resourceManager_r.getRoom(xid, location);
+				// No such room before, undo operation should delete this entry;
+				if(roomNum == null)
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Room, location));
+					// Have such room, the add is actually a update operation. Undo operation reset the room.
+				else
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Room, roomNum));
+				return m_resourceManager_r.addRooms(xid, location, count, price);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+
+		return false;
 	}
 
 	// Deletes flight
@@ -143,55 +202,241 @@ public class ResourceManager implements IMiddleware
 	}
 
 	// Returns the number of empty seats in this flight
-	public int queryFlight(int xid, int flightNum) throws RemoteException
-	{
-		return m_resourceManager_f.queryFlight(xid, flightNum);
+	public int queryFlight(int xid, int flightNum) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") called");
+		try{
+			// get read lock
+			if(LM.Lock(xid, "flight-" + flightNum, TransactionLockObject.LockType.LOCK_READ)) {
+				// have read lock
+				TM.addRM(xid, Transaction.RM.RM_F);
+				return m_resourceManager_f.queryFlight(xid, flightNum);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+
+		return -1;
 	}
 
 	// Returns the number of cars available at a location
-	public int queryCars(int xid, String location) throws RemoteException
-	{
-//		connect();
-		return m_resourceManager_c.queryCars(xid, location);
+	public int queryCars(int xid, String location) throws RemoteException, InvalidTransactionException, DeadlockException {
+
+		Trace.info("RM::queryCars(" + xid + ", " + location +") called");
+		try{
+			//get write lock
+			if(LM.Lock(xid,"car-"+location,TransactionLockObject.LockType.LOCK_READ)){
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_C);
+				return m_resourceManager_c.queryCars(xid, location);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryCars(" + xid + ", " + location  + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryCars(" + xid + ", " + location  + ")  get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryCars(" + xid + ", " + location  + ")  is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+		return -1;
 	}
 
 	// Returns the amount of rooms available at a location
-	public int queryRooms(int xid, String location) throws RemoteException
-	{
-		return m_resourceManager_r.queryRooms(xid, location);
+	public int queryRooms(int xid, String location) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryRooms(" + xid + ", " + location +") called");
+
+		try{
+			//get write lock
+			if(LM.Lock(xid,"room-"+location,TransactionLockObject.LockType.LOCK_READ)){
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_R);
+				return m_resourceManager_r.queryRooms(xid, location);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryRooms(" + xid + ", " + location + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryRooms(" + xid + ", " + location + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryRooms(" + xid + ", " + location + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+		return -1;
 	}
 
 	// Returns price of a seat in this flight
-	public int queryFlightPrice(int xid, int flightNum) throws RemoteException
-	{
-		return m_resourceManager_f.queryFlightPrice(xid, flightNum);
+	public int queryFlightPrice(int xid, int flightNum) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") called");
+		try{
+			// get read lock
+			if(LM.Lock(xid, "flight-" + flightNum, TransactionLockObject.LockType.LOCK_READ)) {
+				// have read lock
+				TM.addRM(xid, Transaction.RM.RM_F);
+				return m_resourceManager_f.queryFlightPrice(xid, flightNum);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+
+		return -1;
 	}
 
 	// Returns price of cars at this location
-	public int queryCarsPrice(int xid, String location) throws RemoteException
-	{
-		return m_resourceManager_c.queryCarsPrice(xid, location);
+	public int queryCarsPrice(int xid, String location) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryCarsPrice(" + xid + ", " + location +") called");
+		try{
+			//get read lock
+			if(LM.Lock(xid,"car-"+location,TransactionLockObject.LockType.LOCK_READ)){
+				// have read lock
+				TM.addRM(xid, Transaction.RM.RM_C);
+				return m_resourceManager_c.queryCarsPrice(xid, location);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryCarsPrice(" + xid + ", " + location  + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryCarsPrice(" + xid + ", " + location  + ")  get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryCarsPrice(" + xid + ", " + location  + ")  is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+		return -1;
 	}
 
 	// Returns room price at this location
-	public int queryRoomsPrice(int xid, String location) throws RemoteException
-	{
-		return m_resourceManager_r.queryRoomsPrice(xid, location);
+	public int queryRoomsPrice(int xid, String location) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryRoomsPrice(" + xid + ", " + location +") called");
+
+		try{
+			//get read lock
+			if(LM.Lock(xid,"room-"+location,TransactionLockObject.LockType.LOCK_READ)){
+				// have read lock
+				TM.addRM(xid, Transaction.RM.RM_R);
+				return m_resourceManager_r.queryRoomsPrice(xid, location);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryRoomsPrice(" + xid + ", " + location + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryRoomsPrice(" + xid + ", " + location + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryRoomsPrice(" + xid + ", " + location + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+		return -1;
 	}
 
-	public String queryCustomerInfo(int xid, int customerID) throws RemoteException
-	{
-		return m_resourceManager_cus.queryCustomerInfo(xid, customerID);
+	public String queryCustomerInfo(int xid, int customerID) throws RemoteException, InvalidTransactionException, DeadlockException {
+		Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID +") called");
+
+		try{
+			//get read lock
+			if(LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_READ)){
+				// have read lock
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				return m_resourceManager_cus.queryCustomerInfo(xid, customerID);
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+		return null;
 	}
 
-	public int newCustomer(int xid) throws RemoteException
-	{
+	public int newCustomer(int xid) throws RemoteException {
 		return m_resourceManager_cus.newCustomer(xid);
 	}
 
-	public boolean newCustomer(int xid, int customerID) throws RemoteException
-	{
-		return m_resourceManager_cus.newCustomer(xid,customerID);
+	public boolean newCustomer(int xid, int customerID) throws RemoteException, DeadlockException, InvalidTransactionException {
+		Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") called");
+
+		try{
+			//get write lock
+			if(LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_WRITE)){
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				boolean success = m_resourceManager_cus.newCustomer(xid,customerID);
+				//if add successful, add to undo list
+				if(success)
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Customer, Integer.toString(customerID)));
+				return success;
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}
+
+		return false;
 	}
 
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException

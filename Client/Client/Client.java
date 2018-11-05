@@ -122,10 +122,15 @@ public abstract class Client
 				int numCars = toInt(arguments.elementAt(3));
 				int price = toInt(arguments.elementAt(4));
 
-				if (m_resourceManager.addCars(id, location, numCars, price)) {
-					System.out.println("Cars added");
-				} else {
-					System.out.println("Cars could not be added");
+				try {
+					if (m_resourceManager.addCars(id, location, numCars, price)) {
+						System.out.println("Cars added");
+					} else {
+						System.out.println("Cars could not be added");
+					}
+				}
+				catch (Exception e){
+					System.out.println(e.getMessage());
 				}
 				break;
 			}
@@ -141,11 +146,15 @@ public abstract class Client
 				String location = arguments.elementAt(2);
 				int numRooms = toInt(arguments.elementAt(3));
 				int price = toInt(arguments.elementAt(4));
-
-				if (m_resourceManager.addRooms(id, location, numRooms, price)) {
-					System.out.println("Rooms added");
-				} else {
-					System.out.println("Rooms could not be added");
+				try{
+					if (m_resourceManager.addRooms(id, location, numRooms, price)) {
+						System.out.println("Rooms added");
+					} else {
+						System.out.println("Rooms could not be added");
+					}
+				}
+					catch (Exception e){
+					System.out.println(e.getMessage());
 				}
 				break;
 			}
