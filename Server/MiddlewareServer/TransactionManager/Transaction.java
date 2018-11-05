@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import MiddlewareServer.Common.ResourceManager;
+import MiddlewareServer.LockManager.LockManager;
 
 public class Transaction {
 
@@ -19,6 +20,7 @@ public class Transaction {
     private ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
     private ResourceManager mw;
+    private LockManager lm;
 
     public enum RM{
         RM_CUS,
@@ -32,9 +34,10 @@ public class Transaction {
         lastCall = date.getTime();
     }
 
-    public Transaction(int xid, ResourceManager mw){
+    public Transaction(int xid, ResourceManager mw, LockManager lm){
         transcationID = xid;
         this.mw = mw;
+        this.lm = lm;
     }
 
     public Transaction(int xid, List<RM> RMList){
@@ -146,6 +149,8 @@ public class Transaction {
         }
         System.out.println("MW_Transaction:UndoOperation for xid:" + transcationID + " finished");
         aborted = true;
+        lm.UnlockAll(transcationID);
+        System.out.println("MW_Transaction:UnlockAll for xid:" + transcationID + "success");
         return true;
     }
 }

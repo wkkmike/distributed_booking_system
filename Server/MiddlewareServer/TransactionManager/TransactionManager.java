@@ -1,6 +1,7 @@
 package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
+import MiddlewareServer.LockManager.LockManager;
 import Server.Common.Trace;
 
 import java.rmi.RemoteException;
@@ -10,16 +11,18 @@ public class TransactionManager {
     private int xid;
     HashMap<Integer, Transaction> transactionList;
     private ResourceManager middleware;
+    private LockManager lm;
 
     public TransactionManager(){
         xid = 1;
         transactionList = new HashMap<Integer, Transaction>();
     }
 
-    public TransactionManager(ResourceManager middleware){
+    public TransactionManager(ResourceManager middleware, LockManager lm){
         xid = 1;
         transactionList = new HashMap<Integer, Transaction>();
         this.middleware = middleware;
+        this.lm = lm;
     }
 
     //assign xid upon request
@@ -27,6 +30,7 @@ public class TransactionManager {
         Transaction t = new Transaction(xid);
         transactionList.put(xid, t);
         xid ++;
+        t.transactionSuspend();
         return (xid - 1);
     }
 
