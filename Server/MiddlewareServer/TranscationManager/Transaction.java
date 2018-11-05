@@ -53,7 +53,7 @@ public class Transaction {
         undoOperation operation = revertOperations.pollLast();
         while(operation != null) {
             switch (operation.getCmd()) {
-                case Delete_Item: {
+                    case Delete_Item: {
                     break;
                 }
                 case Delete_Customer:{
@@ -70,5 +70,6 @@ public class Transaction {
                 }
             }
         }
+        return false;
     }
 }

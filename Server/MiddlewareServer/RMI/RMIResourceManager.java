@@ -5,7 +5,7 @@
 
 package MiddlewareServer.RMI;
 
-import Server.Interface.*;
+import MiddlewareServer.Interface.IMiddleware;
 import MiddlewareServer.Common.*;
 
 import java.rmi.registry.Registry;
@@ -61,7 +61,7 @@ public class RMIResourceManager extends ResourceManager
 		RMIResourceManager server = new RMIResourceManager(s_serverName);
 		try {
 			// Dynamically generate the stub (client proxy)
-			IResourceManager resourceManager = (IResourceManager)UnicastRemoteObject.exportObject(server, 0);
+			IMiddleware resourceManager = (IMiddleware)UnicastRemoteObject.exportObject(server, 0);
 
 			// Bind the remote object's stub in the registry
 			Registry l_registry;

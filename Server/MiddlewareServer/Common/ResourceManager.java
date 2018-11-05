@@ -6,6 +6,9 @@
 package MiddlewareServer.Common;
 
 import MiddlewareServer.Interface.IMiddleware;
+import MiddlewareServer.LockManager.DeadlockException;
+import MiddlewareServer.LockManager.LockManager;
+import MiddlewareServer.LockManager.TransactionLockObject;
 import MiddlewareServer.TranscationManager.InvalidTransactionException;
 import MiddlewareServer.TranscationManager.TransactionManager;
 import MiddlewareServer.TranscationManager.TranscationAbortedException;
@@ -28,7 +31,11 @@ public class ResourceManager implements IMiddleware
 	public IResourceManager m_resourceManager_c = null;
 	public IResourceManager m_resourceManager_r = null;
 	public IResourceManager m_resourceManager_cus = null;
+
+	//changes start
+	private LockManager LM = new LockManager();
 	private TransactionManager TM = new TransactionManager();
+	//changes end
 
 	public ResourceManager(String p_name)
 	{
@@ -72,7 +79,19 @@ public class ResourceManager implements IMiddleware
 	{
 
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
-		return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
+		try{
+			if(LM.Lock(xid, "Flight", TransactionLockObject.LockType.LOCK_WRITE)) {
+				return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
+			}
+		}catch(DeadlockException de){
+			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
+			}
+		}
+		return false;
 	}
 
 	// Create a new car location or add cars to an existing location

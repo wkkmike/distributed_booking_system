@@ -13,16 +13,17 @@ RMIInterface.jar: Server/Interface/IResourceManager.java
 	javac Server/Interface/IResourceManager.java
 	jar cvf RMIInterface.jar Server/Interface/IResourceManager.class
 
-#RMIInterfaceMiddle.jar: MiddlewareServer/Interface/IResourceManager.java
-#	@echo "Compiling RMI middleware server interface"
-#	javac MiddlewareServer/Interface/IResourceManager.java
-#	jar cvf RMIInterfaceMiddle.jar MiddlewareServer/Interface/IResourceManager.class
+RMIInterfaceMiddle.jar: MiddlewareServer/Interface/IMiddleware.java
+	@echo "Compiling RMI middleware server interface"
+	javac MiddlewareServer/Interface/IMiddleware.java
+	jar cvf RMIInterfaceMiddle.jar MiddlewareServer/Interface/IMiddleware.class
 
 compile-server-rmi: Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 	javac Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 
-compile-middlewareServer-rmi: MiddlewareServer/RMI/*.java MiddlewareServer/Common/*.java
-	javac MiddlewareServer/RMI/*.java  MiddlewareServer/Common/*.java
+compile-middlewareServer-rmi: MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java
+	javac MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java
+
 
 clean:
 	rm -f Server/Interface/*.class Server/Common/*.class Server/RMI/*.class

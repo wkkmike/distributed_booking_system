@@ -1,7 +1,6 @@
 package Client;
 
-import MiddlewareServer.Interface.IMiddleware;
-import Server.Interface.*;
+import MiddlewareServer.Interface.*;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -73,6 +72,7 @@ public class RMIClient extends Client
 				}
 				catch (NotBoundException|RemoteException e) {
 					if (first) {
+						e.printStackTrace();
 						System.out.println("Waiting for '" + name + "' server [" + server + ":" + port + "/" + s_rmiPrefix + name + "]");
 						first = false;
 					}
