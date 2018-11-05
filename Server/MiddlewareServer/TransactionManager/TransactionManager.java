@@ -53,4 +53,28 @@ public class TransactionManager {
     public boolean shutdown() throws RemoteException{
         return false;
     }
+
+    public void addRM(int xid, Transaction.RM rm) throws InvalidTransactionException{
+        Transaction transaction = transactionList.get(xid);
+        if(transaction == null)
+            throw new InvalidTransactionException(xid, "no such transaction");
+        transaction.addRMtoRMList(rm);
+        transactionList.put(xid, transaction);
+    }
+
+    public void deleteRM(int xid, Transaction.RM rm) throws InvalidTransactionException{
+        Transaction transaction = transactionList.get(xid);
+        if(transaction == null)
+            throw new InvalidTransactionException(xid, "no such transaction");
+        transaction.removeRMfromRMList(rm);
+        transactionList.put(xid, transaction);
+    }
+
+    public void addUndoOperation(int xid, undoOperation ops) throws InvalidTransactionException{
+        Transaction transaction = transactionList.get(xid);
+        if(transaction == null)
+            throw new InvalidTransactionException(xid, "no such transaction");
+        transaction.addUndoOperation(ops);
+        transactionList.put(xid, transaction);
+    }
 }
