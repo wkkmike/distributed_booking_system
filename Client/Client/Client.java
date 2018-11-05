@@ -427,8 +427,14 @@ public abstract class Client
 
 				int xid = toInt(arguments.elementAt(1));
 				try{
-					m_resourceManager.commit()
+					m_resourceManager.commit(xid);
 				}
+				catch (InvalidTransactionException e){
+
+                }
+                catch (TranscationAbortedException e){
+
+                }
 			}
 			case Quit:
 				checkArgumentsCount(1, arguments.size());

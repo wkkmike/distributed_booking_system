@@ -63,7 +63,6 @@ public class LockManager
 						}
 
 						if (bConvert.get(0) == true) {
-							//TODO: Lock conversion
 							TransactionLockObject xPreLock = new TransactionLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
 							DataLockObject dataPreLock = new DataLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
 							if(!this.lockTable.remove(xPreLock))
@@ -246,13 +245,15 @@ public class LockManager
 							// If other transaction have a read lock.
 							if (dataLockObject.getXId() != t_dataLockObject.getXId()){
 								Trace.info("LM::lockConflict(" + dataLockObject.getXId() + ", " + dataLockObject.getDataName() + ") Want convert to" +
-										" WRITE, someone has READ");
-								bitset.set(0);
-								return false;
+										" WRITE," + t_dataLockObject.getXId() + "has READ lock");
+								return true;
 							}
 						}
+						// Since no other transaction hold lock for this object, we can convert this lock.
+						bitset.set(0);
+						return false;
 					}
-					//TODO: Lock conversion, maybe deadlock
+					//TODO: Lock conversion, maybe deadlock. need to throw??
 				}
 			} 
 			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ)
