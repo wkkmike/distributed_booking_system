@@ -1,7 +1,7 @@
 package MiddlewareServer.Interface;
 
-import MiddlewareServer.TranscationManager.InvalidTransactionException;
-import MiddlewareServer.TranscationManager.TranscationAbortedException;
+import MiddlewareServer.TransactionManager.InvalidTransactionException;
+import MiddlewareServer.TransactionManager.TranscationAbortedException;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

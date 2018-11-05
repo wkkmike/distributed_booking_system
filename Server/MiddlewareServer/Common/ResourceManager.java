@@ -9,9 +9,9 @@ import MiddlewareServer.Interface.IMiddleware;
 import MiddlewareServer.LockManager.DeadlockException;
 import MiddlewareServer.LockManager.LockManager;
 import MiddlewareServer.LockManager.TransactionLockObject;
-import MiddlewareServer.TranscationManager.InvalidTransactionException;
-import MiddlewareServer.TranscationManager.TransactionManager;
-import MiddlewareServer.TranscationManager.TranscationAbortedException;
+import MiddlewareServer.TransactionManager.InvalidTransactionException;
+import MiddlewareServer.TransactionManager.TransactionManager;
+import MiddlewareServer.TransactionManager.TranscationAbortedException;
 import Server.Interface.*;
 import Server.Common.*;
 

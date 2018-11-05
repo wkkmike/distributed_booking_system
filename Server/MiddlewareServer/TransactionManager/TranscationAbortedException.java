@@ -1,4 +1,4 @@
-package MiddlewareServer.TranscationManager;
+package MiddlewareServer.TransactionManager;
 
 public class TranscationAbortedException extends Exception{
     private int m_xid = 0;

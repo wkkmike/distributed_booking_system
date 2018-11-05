@@ -21,8 +21,8 @@ RMIInterfaceMiddle.jar: MiddlewareServer/Interface/IMiddleware.java
 compile-server-rmi: Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 	javac Server/RMI/*.java Server/Interface/IResourceManager.java Server/Common/*.java
 
-compile-middlewareServer-rmi: MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java
-	javac MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java
+compile-middlewareServer-rmi: MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java MiddlewareServer/LockManager/*.java MiddlewareServer/TransactionManager/*.java
+	javac MiddlewareServer/RMI/*.java MiddlewareServer/Interface/IMiddleware.java MiddlewareServer/Common/*.java MiddlewareServer/LockManager/*.java MiddlewareServer/TransactionManager/*.java
 
 
 clean:

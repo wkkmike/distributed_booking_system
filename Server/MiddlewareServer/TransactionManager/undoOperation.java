@@ -1,4 +1,4 @@
-package MiddlewareServer.TranscationManager;
+package MiddlewareServer.TransactionManager;
 
 import Server.Common.RMItem;
 

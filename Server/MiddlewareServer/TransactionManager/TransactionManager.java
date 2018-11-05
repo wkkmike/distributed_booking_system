@@ -1,4 +1,4 @@
-package MiddlewareServer.TranscationManager;
+package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
 
