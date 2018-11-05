@@ -22,7 +22,6 @@ import java.rmi.NotBoundException;
 public class ResourceManager implements IMiddleware
 {
 	protected String m_name = "";
-	protected RMHashMap m_data = new RMHashMap();
     private static String s_rmiPrefix = "group15";
 
 	public IResourceManager m_resourceManager_f = null;

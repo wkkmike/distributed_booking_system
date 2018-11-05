@@ -106,6 +106,46 @@ public class ResourceManager implements IResourceManager
 		return value;        
 	}
 
+	// Return a reservable item, used by TM for undo operation.
+	private ReservableItem getItem(int xid, String key){
+	    Trace.info("RM:getItem(" + xid + ", " + key + ") called");
+	    ReservableItem curObj = (ReservableItem)readData(xid, key);
+	    return (ReservableItem) curObj.clone();
+    }
+
+    public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{
+	    return getItem(xid, Flight.getKey(flightNum));
+    }
+
+    public ReservableItem getCar(int xid, String location) throws RemoteException{
+	    return getItem(xid, Car.getKey(location));
+    }
+
+    public ReservableItem getRoom(int xid, String location) throws RemoteException{
+	    return getItem(xid, Room.getKey(location));
+    }
+
+    // Return a customer by key, used by TM for undo operation.
+    public Customer getCustomer(int xid, int customerId) throws RemoteException{
+	    Trace.info("RM:getCustomer(" + xid + ", " + customerId + ") called");
+	    Customer customer = (Customer)readData(xid, Customer.getKey(customerId));
+	    return (Customer) customer.clone();
+    }
+
+    // For undo operation, reset customer.
+    public void setCustomer(int xid, Customer customer) throws RemoteException{
+	    Trace.info("RM:setCustomer(" + xid + ")called");
+	    Trace.info("RM:" + customer);
+	    writeData(xid, customer.getKey(), customer);
+    }
+
+    // For undo operation. reset the item.
+    public void setItem(int xid, ReservableItem obj) throws RemoteException{
+	    Trace.info("RM:setItem(" + xid + ")called");
+	    Trace.info("RM: " + obj);
+	    writeData(xid, obj.getKey(), obj);
+    }
+
 	// Check the existens of a customer. Only used by customer server
 	public boolean checkCustomer(int xid, int customerID) throws RemoteException{
 		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
@@ -113,7 +153,7 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
-	// Reserve an item fro customer server.
+	// Reserve an item for customer server.
 	public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price) throws RemoteException{
 		Customer customer = (Customer) readData(xid, Customer.getKey(customerID));
 		if(customer == null)

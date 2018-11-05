@@ -2,6 +2,7 @@ package Server.Interface;
 
 import MiddlewareServer.TranscationManager.InvalidTransactionException;
 import MiddlewareServer.TranscationManager.TranscationAbortedException;
+import Server.Common.Customer;
 import Server.Common.ReservableItem;
 
 import java.rmi.Remote;
@@ -241,4 +242,16 @@ public interface IResourceManager extends Remote
 
     public boolean undoAddCars(int xid, String location, int count, int price)
             throws RemoteException;
+
+    public ReservableItem getFlight(int xid, int flightNum) throws RemoteException;
+
+    public ReservableItem getCar(int xid, String location) throws RemoteException;
+
+    public ReservableItem getRoom(int xid, String location) throws RemoteException;
+
+    public void setItem(int xid, ReservableItem obj) throws RemoteException;
+
+    public Customer getCustomer(int xid, int customerId) throws RemoteException;
+
+    public void setCustomer(int xid, Customer customer) throws RemoteException;
 }
