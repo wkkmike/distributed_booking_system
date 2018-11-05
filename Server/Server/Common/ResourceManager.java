@@ -207,6 +207,25 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
+	// Undo add flight operation. Only for update operation.
+	public boolean undoAddFlights(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
+	{
+		Trace.info("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
+		Flight curObj = (Flight)readData(xid, Flight.getKey(flightNum));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") failed, no such flight");
+			return false;
+		}
+		else{
+			curObj.setCount(flightSeats);
+			curObj.setPrice(flightPrice);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") success");
+		}
+		return true;
+	}
+
 	// Create a new car location or add cars to an existing location
 	// NOTE: if price <= 0 and the location already exists, it maintains its current price
 	public boolean addCars(int xid, String location, int count, int price) throws RemoteException
@@ -234,6 +253,25 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
+	// Undo add Cars operation. Only for update operation.
+	public boolean undoAddCars(int xid, String location, int count, int price) throws RemoteException
+	{
+		Trace.info("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") called");
+		Car curObj = (Car)readData(xid, Car.getKey(location));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") failed, no such car");
+			return false;
+		}
+		else{
+			curObj.setCount(count);
+			curObj.setPrice(price);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") success");
+		}
+		return true;
+	}
+
 	// Create a new room location or add rooms to an existing location
 	// NOTE: if price <= 0 and the room location already exists, it maintains its current price
 	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException
@@ -255,6 +293,25 @@ public class ResourceManager implements IResourceManager
 			}
 			writeData(xid, curObj.getKey(), curObj);
 			Trace.info("RM::addRooms(" + xid + ") modified existing location " + location + ", count=" + curObj.getCount() + ", price=$" + price);
+		}
+		return true;
+	}
+
+	// Undo add Rooms operation. Only for update operation.
+	public boolean undoAddRooms(int xid, String location, int count, int price) throws RemoteException
+	{
+		Trace.info("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") called");
+		Room curObj = (Room)readData(xid, Room.getKey(location));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") failed, no such room");
+			return false;
+		}
+		else{
+			curObj.setCount(count);
+			curObj.setPrice(price);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") success");
 		}
 		return true;
 	}

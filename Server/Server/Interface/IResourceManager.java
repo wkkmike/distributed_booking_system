@@ -233,4 +233,12 @@ public interface IResourceManager extends Remote
     public String getName()
         throws RemoteException;
 
+    public boolean undoAddFlights(int xid, int flightNum, int flightSeats, int flightPrice)
+            throws RemoteException;
+
+    public boolean undoAddRooms(int xid, String location, int count, int price)
+            throws RemoteException;
+
+    public boolean undoAddCars(int xid, String location, int count, int price)
+            throws RemoteException;
 }
