@@ -107,6 +107,7 @@ public class ResourceManager implements IResourceManager
 	}
 
 	// Return a reservable item, used by TM for undo operation.
+    // return null, if no such object.
 	private ReservableItem getItem(int xid, String key){
 	    Trace.info("RM:getItem(" + xid + ", " + key + ") called");
 	    ReservableItem curObj = (ReservableItem)readData(xid, key);
