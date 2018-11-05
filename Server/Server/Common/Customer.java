@@ -46,7 +46,7 @@ public class Customer extends RMItem
 		m_reservations.put(reservedItem.getKey(), reservedItem);
 	}
 
-	public boolean unReserve(String key, String location, int price)
+	public boolean undoReserve(String key, String location, int price, int amount)
 	{
 		ReservedItem reservedItem = getReservedItem(key);
 		if(reservedItem == null){
@@ -54,7 +54,7 @@ public class Customer extends RMItem
 			return false;
 		}
 		else{
-			reservedItem.setCount(reservedItem.getCount() - 1);
+			reservedItem.setCount(amount);
 			reservedItem.setPrice(price);
 		}
 		if(reservedItem.getCount() == 0){
