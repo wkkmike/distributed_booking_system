@@ -68,7 +68,7 @@ public interface IMiddleware extends Remote
      * @return Unique customer identifier
      */
     public int newCustomer(int id)
-            throws RemoteException;
+            throws RemoteException, InvalidTransactionException, DeadlockException;
     
     /**
      * Add customer with id.
