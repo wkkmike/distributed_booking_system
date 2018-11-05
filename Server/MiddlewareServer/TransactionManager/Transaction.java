@@ -53,7 +53,7 @@ public class Transaction {
         return returnList;
     }
 
-    public boolean revert(ResourceManager mw){
+    public boolean abort(ResourceManager mw){
         undoOperation operation = undoOperationsList.pollLast();
         while (operation != null) {
             try {
@@ -113,7 +113,7 @@ public class Transaction {
                 return false;
             }
         }
-        System.out.println("MW:UndoOperation for xid:" + transcationID + " finished");
+        System.out.println("MW_Transaction:UndoOperation for xid:" + transcationID + " finished");
         return true;
     }
 }

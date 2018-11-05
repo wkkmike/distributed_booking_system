@@ -80,7 +80,7 @@ public class ResourceManager implements IMiddleware
 
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
 		try{
-			if(LM.Lock(xid, "Flight", TransactionLockObject.LockType.LOCK_WRITE)) {
+			if(LM.Lock(xid, "flight-" + flightNum, TransactionLockObject.LockType.LOCK_WRITE)) {
 				return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
 			}
 		}catch(DeadlockException de){
@@ -281,7 +281,18 @@ public class ResourceManager implements IMiddleware
 
 	@Override
 	public void abort(int transactionId) throws RemoteException, InvalidTransactionException {
-		TM.abort(transactionId);
+		if (TM.abort(transactionId)) {
+			Trace.info("MW:abort(xid:" + transactionId + ") success");
+		}
+		else{
+			Trace.info("MW:abort(xid:" + transactionId + ") failed");
+		}
+		if(LM.UnlockAll(transactionId)){
+			Trace.info("MW:Unlock all lock for xid:" + transactionId + " success");
+		}
+		else{
+			Trace.info("MW:Unlock all lock for xid:" + transactionId + " failed");
+		}
 	}
 
 	@Override

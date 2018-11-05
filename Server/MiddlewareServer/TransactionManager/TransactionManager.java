@@ -1,6 +1,7 @@
 package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
+import Server.Common.Trace;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -31,16 +32,24 @@ public class TransactionManager {
 
     public boolean commit(int transactionId) throws RemoteException,
             TranscationAbortedException, InvalidTransactionException{
+        Transaction transaction = transactionList.get(transactionId);
+        if(transaction == null)
+            throw new InvalidTransactionException(xid, "no such transaction");
         return false;
     }
 
-    public void abort(int transactionId) throws RemoteException,
+    public boolean abort(int transactionId) throws RemoteException,
             InvalidTransactionException {
         Transaction transaction = transactionList.get(transactionId);
         if (transaction == null)
             throw new InvalidTransactionException(xid, "no such transaction");
-
+        if(transaction.abort(middleware)) {
+            transactionList.remove(transactionId);
+            return true;
+        }
+        return false;
     }
+
     public boolean shutdown() throws RemoteException{
         return false;
     }
