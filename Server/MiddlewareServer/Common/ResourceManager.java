@@ -9,9 +9,7 @@ import MiddlewareServer.Interface.IMiddleware;
 import MiddlewareServer.LockManager.DeadlockException;
 import MiddlewareServer.LockManager.LockManager;
 import MiddlewareServer.LockManager.TransactionLockObject;
-import MiddlewareServer.TransactionManager.InvalidTransactionException;
-import MiddlewareServer.TransactionManager.TransactionManager;
-import MiddlewareServer.TransactionManager.TranscationAbortedException;
+import MiddlewareServer.TransactionManager.*;
 import Server.Interface.*;
 import Server.Common.*;
 
@@ -75,23 +73,37 @@ public class ResourceManager implements IMiddleware
 
 	// Create a new flight, or add seats to existing flight
 	// NOTE: if flightPrice <= 0 and the flight already exists, it maintains its current price
-	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException, InvalidTransactionException
+	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException, InvalidTransactionException, DeadlockException
 	{
-
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
 		try{
+			// get write lock
 			if(LM.Lock(xid, "flight-" + flightNum, TransactionLockObject.LockType.LOCK_WRITE)) {
+				// have write lock
+				TM.addRM(xid, Transaction.RM.RM_F);
+				ReservableItem flight = m_resourceManager_f.getFlight(xid, flightNum);
+				// No such flight before, undo operation should delete this entry;
+				if(flight == null)
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Flight, Integer.toString(flightNum)));
+				// Have such flight, the add is actually a update operation. Undo operation reset the flight.
+				else
+					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Flight, flight));
 				return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
 			}
-		}catch(DeadlockException de){
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
 			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") get deadlock, now going to abort this transaction");
-			throw
 			try {
 				TM.abort(xid);
 			}catch (InvalidTransactionException ie){
 				Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
-				throw new InvalidTransactionException(xid, "no such transaction");
+				throw ie;
 			}
+			throw de;
 		}
 		return false;
 	}
