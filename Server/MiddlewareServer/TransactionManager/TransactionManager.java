@@ -38,12 +38,26 @@ public class TransactionManager {
         return false;
     }
 
+    public boolean transactionInvoke(int transactionId) throws InvalidTransactionException{
+        Transaction transaction = transactionList.get(transactionId);
+        if(transaction == null)
+            throw new InvalidTransactionException(transactionId, "no such transaction");
+        return transaction.transactionInvoke();
+    }
+
+    public void transactionSuspend(int transactionId){
+        Transaction transaction = transactionList.get(transactionId);
+        if(transaction == null)
+            return;
+        transaction.transactionSuspend();
+    }
+
     public boolean abort(int transactionId) throws RemoteException,
             InvalidTransactionException {
         Transaction transaction = transactionList.get(transactionId);
         if (transaction == null)
             throw new InvalidTransactionException(xid, "no such transaction");
-        if(transaction.abort(middleware)) {
+        if(transaction.abort()) {
             transactionList.remove(transactionId);
             return true;
         }

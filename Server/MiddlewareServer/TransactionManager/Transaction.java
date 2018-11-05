@@ -1,16 +1,24 @@
 package MiddlewareServer.TransactionManager;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import MiddlewareServer.Common.ResourceManager;
 
 public class Transaction {
 
-
+    private final long TIMEOUT = 30000;
     private int transcationID;
     List<RM> RMList = new ArrayList<RM>();
     LinkedList<undoOperation> undoOperationsList = new LinkedList<undoOperation>();
     private boolean aborted = false;
+    private Date date = new Date();
+    private long lastCall;
+    private ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(1);
+    private ResourceManager mw;
 
     public enum RM{
         RM_CUS,
@@ -21,6 +29,12 @@ public class Transaction {
 
     public Transaction(int xid){
         transcationID = xid;
+        lastCall = date.getTime();
+    }
+
+    public Transaction(int xid, ResourceManager mw){
+        transcationID = xid;
+        this.mw = mw;
     }
 
     public Transaction(int xid, List<RM> RMList){
@@ -28,8 +42,25 @@ public class Transaction {
         this.RMList = new ArrayList<RM>(RMList);
     }
 
-    public int getTranscationID(){
+    public int getTransactionID(){
         return transcationID;
+    }
+
+    public boolean transactionInvoke(){
+        if(aborted){
+            return false;
+        }
+        scheduler.shutdown();
+        return true;
+    }
+
+    public void transactionSuspend(){
+        scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(new Runnable() {
+            public void run() {
+                System.out.println("MW:: Transaction:<" + transcationID + "> timeout");
+                abort();}
+        }, TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     public void addRMtoRMList(RM rm){
@@ -53,7 +84,7 @@ public class Transaction {
         return returnList;
     }
 
-    public boolean abort(ResourceManager mw){
+    public boolean abort(){
         undoOperation operation = undoOperationsList.pollLast();
         while (operation != null) {
             try {
@@ -114,6 +145,7 @@ public class Transaction {
             }
         }
         System.out.println("MW_Transaction:UndoOperation for xid:" + transcationID + " finished");
+        aborted = true;
         return true;
     }
 }
