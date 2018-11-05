@@ -1,6 +1,6 @@
 package Client;
 
-import MiddlewareServer.Interface.*;
+import MiddlewareServer.Interface.IMiddleware;
 
 
 import java.util.*;
@@ -422,14 +422,19 @@ public abstract class Client
 				break;
 			}
 			case Commit:{
-//				checkArgumentsCount(2, arguments.size());
-//				System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
-//
-//				int xid = toInt(arguments.elementAt(1));
-//				try{
-//					m_resourceManager.commit();
-//				}
-				break;
+				checkArgumentsCount(2, arguments.size());
+				System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
+
+				int xid = toInt(arguments.elementAt(1));
+				try{
+					m_resourceManager.commit(xid);
+				}
+				catch (InvalidTransactionException e){
+
+                }
+                catch (TranscationAbortedException e){
+
+                }
 			}
 			case Quit:
 				checkArgumentsCount(1, arguments.size());
