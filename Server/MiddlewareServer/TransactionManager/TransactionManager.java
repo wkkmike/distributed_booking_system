@@ -42,7 +42,11 @@ public class TransactionManager {
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(transactionId, "no such transaction");
-        return transaction.transactionInvoke();
+        if(!transaction.transactionInvoke()){
+            transactionList.remove(transactionId);
+            return false;
+        }
+        return true;
     }
 
     public void transactionSuspend(int transactionId){
