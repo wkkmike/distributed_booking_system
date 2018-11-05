@@ -97,10 +97,15 @@ public abstract class Client
 				int flightSeats = toInt(arguments.elementAt(3));
 				int flightPrice = toInt(arguments.elementAt(4));
 
-				if (m_resourceManager.addFlight(id, flightNum, flightSeats, flightPrice)) {
-					System.out.println("Flight added");
-				} else {
-					System.out.println("Flight could not be added");
+				try {
+					if (m_resourceManager.addFlight(id, flightNum, flightSeats, flightPrice)) {
+						System.out.println("Flight added");
+					} else {
+						System.out.println("Flight could not be added");
+					}
+				}
+				catch (Exception e){
+					System.out.println(e.getMessage());
 				}
 				break;
 			}
