@@ -288,5 +288,46 @@ public class ResourceManager implements IMiddleware
 	public boolean shutdown() throws RemoteException {
 		return TM.shutdown();
 	}
+
+	public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{
+		Trace.info("MW:getFlight (xid:" + xid + ", flightNum:" + flightNum + ") called");
+		return (ReservableItem) m_resourceManager_f.getFlight(xid, flightNum).clone();
+	}
+
+	public ReservableItem getCar(int xid, String location) throws RemoteException{
+		Trace.info("MW:getCar (xid:" + xid + ", location:" + location + ") called");
+		return (ReservableItem) m_resourceManager_c.getCar(xid, location).clone();
+	}
+
+	public ReservableItem getRoom(int xid, String location) throws RemoteException{
+		Trace.info("MW:getRoom (xid:" + xid + ", location:" + location + ") called");
+		return (ReservableItem) m_resourceManager_r.getRoom(xid, location).clone();
+	}
+
+	public Customer getCustomer(int xid, int customerId) throws RemoteException{
+		Trace.info("MW:getCustomer (xid:" + xid + ", customerId:" + customerId + ") called");
+		return (Customer) m_resourceManager_cus.getCustomer(xid, customerId).clone();
+	}
+
+	public void setFlight(int xid, ReservableItem obj) throws RemoteException{
+		Trace.info("MW:setFlight (xid:" + xid + ", flight:<" + obj + ">) called");
+		m_resourceManager_f.setFlight(xid, obj);
+	}
+
+	public void setCar(int xid, ReservableItem obj) throws RemoteException{
+		Trace.info("MW:setCar (xid:" + xid + ", car:<" + obj + ">) called");
+		m_resourceManager_c.setCar(xid, obj);
+	}
+
+	public void setRoom(int xid, ReservableItem obj) throws RemoteException{
+		Trace.info("MW:setRoom (xid:" + xid + ", room:<" + obj + ">) called");
+		m_resourceManager_r.setRoom(xid, obj);
+	}
+
+
+	public void setCustomer(int xid, Customer customer) throws RemoteException{
+		Trace.info("MW:setCustomer (xid:" + xid + ", customer:<" + customer + ">) called");
+		m_resourceManager_cus.setCustomer(xid, customer);
+	}
 }
  

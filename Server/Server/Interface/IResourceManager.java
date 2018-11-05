@@ -247,7 +247,11 @@ public interface IResourceManager extends Remote
 
     public ReservableItem getRoom(int xid, String location) throws RemoteException;
 
-    public void setItem(int xid, ReservableItem obj) throws RemoteException;
+    public void setFlight(int xid, ReservableItem obj) throws RemoteException;
+
+    public void setCar(int xid, ReservableItem obj) throws RemoteException;
+
+    public void setRoom(int xid, ReservableItem obj) throws RemoteException;
 
     public Customer getCustomer(int xid, int customerId) throws RemoteException;
 

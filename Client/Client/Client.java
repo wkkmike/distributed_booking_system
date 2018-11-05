@@ -429,11 +429,8 @@ public abstract class Client
 				try{
 					m_resourceManager.commit(xid);
 				}
-				catch (InvalidTransactionException e){
-
-                }
-                catch (TranscationAbortedException e){
-
+				catch (Exception e){
+					System.out.println(e.getMessage());
                 }
 			}
 			case Quit:

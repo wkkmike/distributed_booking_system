@@ -138,11 +138,26 @@ public class ResourceManager implements IResourceManager
     }
 
     // For undo operation. reset the item.
-    public void setItem(int xid, ReservableItem obj) throws RemoteException{
+    private void setItem(int xid, ReservableItem obj) throws RemoteException{
 	    Trace.info("RM:setItem(" + xid + ")called");
 	    Trace.info("RM: " + obj);
 	    writeData(xid, obj.getKey(), obj);
     }
+
+	@Override
+	public void setFlight(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
+
+	@Override
+	public void setCar(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
+
+	@Override
+	public void setRoom(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
 
 	// Check the existens of a customer. Only used by customer server
 	public boolean checkCustomer(int xid, int customerID) throws RemoteException{
