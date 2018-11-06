@@ -94,6 +94,7 @@ public class Transaction {
     }
 
     public synchronized boolean abort(){
+        scheduler.shutdownNow();
         if(aborted){
             System.out.println("MW::abort [xid:" + transcationID + "] has been aborted");
             return false;
