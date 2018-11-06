@@ -825,7 +825,13 @@ public class ResourceManager implements IMiddleware
 
 	@Override
 	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException, InvalidTransactionException {
-		return TM.commit(transactionId);
+		Trace.info("MW:commit(xid:" + transactionId +") called");
+		if(TM.commit(transactionId)){
+			Trace.info("MW:commit(xid:" + transactionId +") success");
+			return true;
+		}
+		Trace.info("MW:commit(xid:" + transactionId +") fail");
+		return false;
 	}
 
 	@Override
