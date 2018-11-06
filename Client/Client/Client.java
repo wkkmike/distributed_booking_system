@@ -450,7 +450,7 @@ public abstract class Client
 
 					int xid = toInt(arguments.elementAt(1));
 					m_resourceManager.abort(xid);
-					System.out.println("Commit xid:" + xid + ", success");
+					System.out.println("Abort xid:" + xid + ", success");
 					break;
 				}
 				case Quit:
