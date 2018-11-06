@@ -18,7 +18,7 @@ public class RMIResourceManager extends ResourceManager
 {
 	private static String s_serverName = "MiddlewareServer";
 	private static String s_rmiPrefix = "group15";
-
+	private static Registry l_registry;
 
 	private static String s_serverHost_Flight = "localhost";
 	private static int s_serverPort_Flight = 1099;
@@ -66,7 +66,7 @@ public class RMIResourceManager extends ResourceManager
 			IMiddleware resourceManager = (IMiddleware)UnicastRemoteObject.exportObject(server, 0);
 
 			// Bind the remote object's stub in the registry
-			Registry l_registry;
+			//Registry l_registry;
 			try {
 				l_registry = LocateRegistry.createRegistry(1099);
 			} catch (RemoteException e) {
@@ -150,7 +150,7 @@ public class RMIResourceManager extends ResourceManager
 		Registry registry = LocateRegistry.getRegistry(1099);
 		try{
 			// Unregister ourself
-			registry.unbind(s_rmiPrefix + s_serverName);
+			l_registry.unbind(s_rmiPrefix + s_serverName);
 
 			// Unexport; this will also remove us from the RMI runtime
 			UnicastRemoteObject.unexportObject(this, true);
