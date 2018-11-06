@@ -436,7 +436,12 @@ public abstract class Client
 					System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
 
 					int xid = toInt(arguments.elementAt(1));
-					m_resourceManager.commit(xid);
+					if(m_resourceManager.commit(xid)){
+						System.out.println("Commit xid:" + xid + ", success");
+					}
+					else{
+						System.out.println("Commit xid:" + xid + ", failed");
+					}
 					break;
 				}
 				case Quit:
