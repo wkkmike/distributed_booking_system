@@ -659,80 +659,176 @@ public class ResourceManager implements IMiddleware
 	}
 
 	// Adds flight reservation to this customer
-	public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException
-	{
-		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
-			return false;
-		if(!m_resourceManager_f.reserveFlight(xid, customerID, flightNum))
-			return false;
-		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_f.getFlightKey(xid, flightNum),
-				String.valueOf(flightNum), m_resourceManager_f.queryFlightPrice(xid, flightNum)))
-			return false;
-		return true;
+	public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException, InvalidTransactionException, DeadlockException {
+		try{
+			if(!TM.transactionInvoke(xid)){
+				throw new InvalidTransactionException(xid,"This transaction is aborted");
+			}
+			if(LM.Lock(xid,"flight-"+flightNum,TransactionLockObject.LockType.LOCK_WRITE) &&
+					LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_WRITE)) {
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.checkCustomer(xid, customerID)) {
+					return false;
+				}
+				ReservableItem flight = m_resourceManager_f.getFlight(xid, flightNum);
+				TM.addRM(xid, Transaction.RM.RM_F);
+				if (!m_resourceManager_f.reserveFlight(xid, customerID, flightNum)) {
+					return false;
+				}
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Flight, flight));
+				Customer customer = m_resourceManager_cus.getCustomer(xid, customerID);
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_f.getFlightKey(xid, flightNum),
+						String.valueOf(flightNum), m_resourceManager_f.queryFlightPrice(xid, flightNum))) {
+					return false;
+				}
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Customer, customer));
+				return true;
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}finally{
+			TM.transactionSuspend(xid);
+		}
+		return false;
 	}
 
 	// Adds car reservation to this customer
-	public boolean reserveCar(int xid, int customerID, String location) throws RemoteException
-	{
-		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
-			return false;
-		if(!m_resourceManager_c.reserveCar(xid, customerID, location))
-			return false;
-		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_c.getCarKey(xid, location),
-				location, m_resourceManager_f.queryCarsPrice(xid, location)))
-			return false;
-		return true;
+	public boolean reserveCar(int xid, int customerID, String location) throws RemoteException, InvalidTransactionException, DeadlockException {
+		try {
+			if(!TM.transactionInvoke(xid)){
+				throw new InvalidTransactionException(xid,"This transaction is aborted");
+			}
+			if(LM.Lock(xid,"car-"+location,TransactionLockObject.LockType.LOCK_WRITE) &&
+					LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_WRITE)) {
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.checkCustomer(xid, customerID))
+					return false;
+				ReservableItem car = m_resourceManager_f.getCar(xid, location);
+				TM.addRM(xid, Transaction.RM.RM_C);
+				if (!m_resourceManager_c.reserveCar(xid, customerID, location))
+					return false;
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, car));
+				Customer customer = m_resourceManager_cus.getCustomer(xid, customerID);
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_c.getCarKey(xid, location),
+						location, m_resourceManager_c.queryCarsPrice(xid, location)))
+					return false;
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Customer, customer));
+				return true;
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}finally{
+			TM.transactionSuspend(xid);
+		}
+		return false;
 	}
 
 	// Adds room reservation to this customer
-	public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException
-	{
-		if(!m_resourceManager_cus.checkCustomer(xid, customerID))
-			return false;
-		if(!m_resourceManager_r.reserveRoom(xid, customerID, location))
-			return false;
-		if(!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_r.getRoomKey(xid, location),
-				location, m_resourceManager_r.queryRoomsPrice(xid, location)))
-			return false;
-		return true;
+	public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException, DeadlockException, InvalidTransactionException {
+		try {
+			if(!TM.transactionInvoke(xid)){
+				throw new InvalidTransactionException(xid,"This transaction is aborted");
+			}
+			if(LM.Lock(xid,"room-"+location,TransactionLockObject.LockType.LOCK_WRITE) &&
+					LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_WRITE)) {
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.checkCustomer(xid, customerID))
+					return false;
+				ReservableItem room = m_resourceManager_f.getRoom(xid, location);
+				TM.addRM(xid, Transaction.RM.RM_R);
+				if (!m_resourceManager_r.reserveRoom(xid, customerID, location))
+					return false;
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Room, room));
+				Customer customer = m_resourceManager_cus.getCustomer(xid, customerID);
+				TM.addRM(xid, Transaction.RM.RM_CUS);
+				if (!m_resourceManager_cus.reserveItem_cus(xid, customerID, m_resourceManager_r.getRoomKey(xid, location),
+						location, m_resourceManager_r.queryRoomsPrice(xid, location)))
+					return false;
+				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Customer, customer));
+				return true;
+			}
+		}
+		catch(InvalidTransactionException e){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+			throw e;
+		}
+		catch(DeadlockException de){
+			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") get deadlock, now going to abort this transaction");
+			try {
+				TM.abort(xid);
+			}catch (InvalidTransactionException ie){
+				Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
+				throw ie;
+			}
+			throw de;
+		}finally{
+			TM.transactionSuspend(xid);
+		}
+		return false;
 	}
 
 	// Reserve bundle 
 	public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws RemoteException
 	{
-        Boolean flag = true;
-		for(String flightNumber: flightNumbers){
-			if(queryFlight(xid, Integer.parseInt(flightNumber)) <= 0){
-				return false;
-			}
-		}
-		if(car){
-			if(queryCars(xid, location) <= 0){
-				return false;
-			}
-		}
-		if(room){
-			if(queryRooms(xid, location) <= 0){
-				return false;
-			}
-		}
-
-		for(String flightNumber: flightNumbers){
-            if(!reserveFlight(xid, customerId, Integer.parseInt(flightNumber))){
-            	flag = false;
-			}
-        }
-        if(car){
-            if(!reserveCar(xid, customerId, location)){
-            	flag = false;
-			}
-        }
-        if(room){
-            if(!reserveRoom(xid, customerId, location)){
-            	flag = false;
-			}
-        }
-		if(flag) return true;
+//        Boolean flag = true;
+//		for(String flightNumber: flightNumbers){
+//			if(queryFlight(xid, Integer.parseInt(flightNumber)) <= 0){
+//				return false;
+//			}
+//		}
+//		if(car){
+//			if(queryCars(xid, location) <= 0){
+//				return false;
+//			}
+//		}
+//		if(room){
+//			if(queryRooms(xid, location) <= 0){
+//				return false;
+//			}
+//		}
+//
+//		for(String flightNumber: flightNumbers){
+//            if(!reserveFlight(xid, customerId, Integer.parseInt(flightNumber))){
+//            	flag = false;
+//			}
+//        }
+//        if(car){
+//            if(!reserveCar(xid, customerId, location)){
+//            	flag = false;
+//			}
+//        }
+//        if(room){
+//            if(!reserveRoom(xid, customerId, location)){
+//            	flag = false;
+//			}
+//        }
+//		if(flag) return true;
 		return false;
 	}
 
