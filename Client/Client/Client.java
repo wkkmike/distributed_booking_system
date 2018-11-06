@@ -454,7 +454,7 @@ public abstract class Client
 					break;
 				}
 				case Shutdown:{
-					checkArgumentsCount(2, arguments.size());
+					checkArgumentsCount(1, arguments.size());
 					System.out.println("Shutdown all server.");
 					m_resourceManager.shutdown();
 					System.out.println("Shutdown all server success");
