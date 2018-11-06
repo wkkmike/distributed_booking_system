@@ -453,6 +453,13 @@ public abstract class Client
 					System.out.println("Abort xid:" + xid + ", success");
 					break;
 				}
+				case Shutdown:{
+					checkArgumentsCount(2, arguments.size());
+					System.out.println("Shutdown all server.");
+					m_resourceManager.shutdown();
+					System.out.println("Shutdown all server success");
+					break;
+				}
 				case Quit:
 					checkArgumentsCount(1, arguments.size());
 

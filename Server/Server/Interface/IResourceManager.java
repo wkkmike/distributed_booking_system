@@ -256,4 +256,6 @@ public interface IResourceManager extends Remote
     public Customer getCustomer(int xid, int customerId) throws RemoteException;
 
     public void setCustomer(int xid, Customer customer) throws RemoteException;
+
+    public boolean shutdown() throws RemoteException;
 }

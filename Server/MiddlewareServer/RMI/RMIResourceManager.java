@@ -7,6 +7,7 @@ package MiddlewareServer.RMI;
 
 import MiddlewareServer.Interface.IMiddleware;
 import MiddlewareServer.Common.*;
+import Server.Common.Trace;
 
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -131,6 +132,33 @@ public class RMIResourceManager extends ResourceManager
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
 			e.printStackTrace();
 			System.exit(1);
+		}
+		return true;
+	}
+
+	public boolean shutdown() throws RemoteException{
+		try {
+			m_resourceManager_c.shutdown();
+			m_resourceManager_cus.shutdown();
+			m_resourceManager_f.shutdown();
+			m_resourceManager_r.shutdown();
+		}
+		catch (RemoteException e){
+			Trace.error("RM::Shutdown server failed." + e.getMessage());
+		}
+
+		Registry registry = LocateRegistry.getRegistry(1099);
+		try{
+			// Unregister ourself
+			registry.unbind(s_rmiPrefix + s_serverName);
+
+			// Unexport; this will also remove us from the RMI runtime
+			UnicastRemoteObject.unexportObject(this, true);
+
+			Trace.info("RM::" + s_rmiPrefix + s_serverName + " shutdown");
+		}
+		catch(Exception e){
+			Trace.info("RM::Problem during shutdown: " + e.getMessage());
 		}
 		return true;
 	}

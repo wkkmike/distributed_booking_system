@@ -141,7 +141,12 @@ public class ResourceManager implements IResourceManager
 	    writeData(xid, customer.getKey(), customer);
     }
 
-    // For undo operation. reset the item.
+	@Override
+	public boolean shutdown() throws RemoteException {
+		return false;
+	}
+
+	// For undo operation. reset the item.
     private void setItem(int xid, ReservableItem obj) throws RemoteException{
 	    Trace.info("RM:setItem(" + xid + ")called");
 	    Trace.info("RM: " + obj);

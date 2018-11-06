@@ -5,6 +5,7 @@
 
 package Server.RMI;
 
+import MiddlewareServer.TransactionManager.Transaction;
 import Server.Interface.*;
 import Server.Common.*;
 
@@ -76,5 +77,22 @@ public class RMIResourceManager extends ResourceManager
 	public RMIResourceManager(String name)
 	{
 		super(name);
+	}
+
+	public boolean shutdown() throws RemoteException{
+		Registry registry = LocateRegistry.getRegistry(1099);
+		try{
+			// Unregister ourself
+			registry.unbind(s_rmiPrefix + s_serverName);
+
+			// Unexport; this will also remove us from the RMI runtime
+			UnicastRemoteObject.unexportObject(this, true);
+
+			Trace.info("RM::" + s_rmiPrefix + s_serverName + " shutdown");
+		}
+		catch(Exception e){
+			Trace.info("RM::Problem during shutdown: " + e.getMessage());
+		}
+		return true;
 	}
 }

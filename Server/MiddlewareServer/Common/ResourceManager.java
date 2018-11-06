@@ -16,6 +16,7 @@ import Server.Common.*;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
@@ -854,8 +855,8 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public boolean shutdown() throws RemoteException {
-		return TM.shutdown();
+	public boolean shutdown() throws RemoteException{
+		return false;
 	}
 
 	public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{
