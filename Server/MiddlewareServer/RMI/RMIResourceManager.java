@@ -37,6 +37,7 @@ public class RMIResourceManager extends ResourceManager
 
 	public static void main(String args[])
 	{
+		System.setSecurityManager(null);
 		if(args.length > 0)
 		{
 			s_serverHost_Flight = args[0];

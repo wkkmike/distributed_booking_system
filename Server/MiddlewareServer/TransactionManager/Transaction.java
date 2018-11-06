@@ -50,10 +50,9 @@ public class Transaction {
         return transcationID;
     }
 
-    public boolean transactionInvoke(){
-        if(aborted){
-            return false;
-        }
+    public boolean transactionInvoke() throws TranscationAbortedException{
+        if(aborted)
+            throw new TranscationAbortedException(transcationID, "This transaction has been aborted");
         scheduler.shutdownNow();
         return true;
     }
