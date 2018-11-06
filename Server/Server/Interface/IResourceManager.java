@@ -1,6 +1,7 @@
 package Server.Interface;
 
 import Server.Common.Customer;
+import Server.Common.RMHashMap;
 import Server.Common.ReservableItem;
 
 import java.rmi.Remote;
@@ -258,4 +259,8 @@ public interface IResourceManager extends Remote
     public void setCustomer(int xid, Customer customer) throws RemoteException;
 
     public boolean shutdown() throws RemoteException;
+
+    public HashMap<String, Integer> getCustomerReservations(int xid, int customerID) throws RemoteException;
+
+    public void reduceReservations(int xid, String key, int num) throws RemoteException;
 }

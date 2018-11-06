@@ -616,6 +616,30 @@ public class ResourceManager implements IMiddleware
 			if(LM.Lock(xid,"customer-"+customerID,TransactionLockObject.LockType.LOCK_WRITE)){
 				// have write lock
 				TM.addRM(xid, Transaction.RM.RM_CUS);
+				HashMap<String, Integer> reservations = m_resourceManager_cus.getCustomerReservations(xid, customerID);
+				for(String reservationKey: reservations.keySet()){
+					LM.Lock(xid, reservationKey, TransactionLockObject.LockType.LOCK_WRITE);
+				}
+
+				for(String reservationKey: reservations.keySet()){
+					ReservableItem item;
+					if(reservationKey.charAt(0) == 'c'){
+						item = m_resourceManager_c.getCar(xid, reservationKey.substring(4));
+						TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, item));
+						m_resourceManager_c.reduceReservations(xid, reservationKey, reservations.get(reservationKey));
+					}
+					else if(reservationKey.charAt(0) == 'f'){
+						item = m_resourceManager_f.getFlight(xid, Integer.parseInt(reservationKey.substring(7)));
+						TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Flight, item));
+						m_resourceManager_f.reduceReservations(xid, reservationKey, reservations.get(reservationKey));
+					}
+					else{
+						item = m_resourceManager_r.getRoom(xid, reservationKey.substring(5));
+						TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Room, item));
+						m_resourceManager_r.reduceReservations(xid, reservationKey, reservations.get(reservationKey));
+					}
+				}
+
 				Customer customer = m_resourceManager_cus.getCustomer(xid,customerID);
 				//if add successful, add to undo list
 				if(customer != null)

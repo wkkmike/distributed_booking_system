@@ -6,6 +6,7 @@
 package Server.Common;
 
 import Server.Interface.*;
+import com.sun.org.apache.regexp.internal.RE;
 
 import java.util.*;
 import java.rmi.RemoteException;
@@ -481,6 +482,35 @@ public class ResourceManager implements IResourceManager
 		}
 	}
 
+	public HashMap<String, Integer> getCustomerReservations(int xid, int customerID) throws RemoteException{
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") called");
+		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
+		if(customer == null){
+			Trace.warn("RM::getCustomerReservations(" + xid + ", " + customerID + ") failed--customer doesn't exist");
+			return null;
+		}
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") success");
+		RMHashMap reservations = customer.getReservations();
+		HashMap<String, Integer> reservationList = new HashMap<String, Integer>();
+		for(String reservedKey: reservations.keySet()){
+			ReservedItem reserveditem = customer.getReservedItem(reservedKey);
+			Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") has reserved " + reserveditem.getKey() + " " +  reserveditem.getCount() +  " times");
+			reservationList.put(reserveditem.getKey(), reserveditem.getCount());
+		}
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") success");
+		return reservationList;
+	}
+
+	public void reduceReservations(int xid, String key, int num) throws RemoteException{
+		Trace.info("RM::reduceReservations(" + xid + ") called");
+		ReservableItem item = (ReservableItem) readData(xid, key);
+		item.setReserved(item.getReserved() - num);
+		item.setCount(item.getCount() + num);
+		Trace.info("RM::" + key + " decrease " + num + " reservations.");
+		writeData(xid, item.getKey(), item);
+		Trace.info("RM::reduceReservations(" + xid + ") success");
+	}
+
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException
 	{
 		Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
@@ -493,7 +523,8 @@ public class ResourceManager implements IResourceManager
 		else
 		{            
 			// Increase the reserved numbers of all reservable items which the customer reserved. 
- 			RMHashMap reservations = customer.getReservations();
+ 			/*
+			RMHashMap reservations = customer.getReservations();
 			for (String reservedKey : reservations.keySet())
 			{        
 				ReservedItem reserveditem = customer.getReservedItem(reservedKey);
@@ -504,7 +535,7 @@ public class ResourceManager implements IResourceManager
 				item.setCount(item.getCount() + reserveditem.getCount());
 				writeData(xid, item.getKey(), item);
 			}
-
+			*/
 			// Remove the customer from the storage
 			removeData(xid, customer.getKey());
 			Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") succeeded");
