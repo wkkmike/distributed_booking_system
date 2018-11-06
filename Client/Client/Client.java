@@ -444,6 +444,15 @@ public abstract class Client
 					}
 					break;
 				}
+				case Abort: {
+					checkArgumentsCount(2, arguments.size());
+					System.out.println("Abort transaction [xid=" + arguments.elementAt(1) + "]");
+
+					int xid = toInt(arguments.elementAt(1));
+					m_resourceManager.abort(xid)
+					System.out.println("Commit xid:" + xid + ", success");
+					break;
+				}
 				case Quit:
 					checkArgumentsCount(1, arguments.size());
 
