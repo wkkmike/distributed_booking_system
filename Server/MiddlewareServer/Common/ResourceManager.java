@@ -898,5 +898,25 @@ public class ResourceManager implements IMiddleware
 		Trace.info("MW:setCustomer (xid:" + xid + ", customer:<" + customer + ">) called");
 		m_resourceManager_cus.setCustomer(xid, customer);
 	}
+
+	public void undoAddFlights(int xid, int flightNum)throws RemoteException{
+		Trace.info("MW:undoAddFlight (xid:" + xid + ", flight:" + flightNum +") called");
+		m_resourceManager_f.deleteFlight(xid, flightNum);
+	}
+
+	public void undoAddCars(int xid, String location)throws RemoteException{
+		Trace.info("MW:undoAddCars (xid:" + xid + ", location:" + location +") called");
+		m_resourceManager_c.deleteCars(xid, location);
+	}
+
+	public void undoAddRooms(int xid, String location)throws RemoteException{
+		Trace.info("MW:undoAddRooms (xid:" + xid + ", location:" + location +") called");
+		m_resourceManager_r.deleteRooms(xid, location);
+	}
+
+	public void undoAddCustomers(int xid, int customerId)throws RemoteException{
+		Trace.info("MW:undoAddCustomers (xid:" + xid + ", customer:" + customerId +") called");
+		m_resourceManager_cus.deleteCustomer(xid, customerId);
+	}
 }
  

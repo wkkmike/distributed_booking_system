@@ -103,19 +103,19 @@ public class Transaction {
             try {
                 switch (operation.getCmd()) {
                     case Delete_Car: {
-                        mw.deleteCars(transcationID, operation.getKey());
+                        mw.undoAddCars(transcationID, operation.getKey());
                         break;
                     }
                     case Delete_Customer: {
-                        mw.deleteCustomer(transcationID, Integer.parseInt(operation.getKey()));
+                        mw.undoAddCustomers(transcationID, Integer.parseInt(operation.getKey()));
                         break;
                     }
                     case Delete_Room: {
-                        mw.deleteRooms(transcationID, operation.getKey());
+                        mw.undoAddRooms(transcationID, operation.getKey());
                         break;
                     }
                     case Delete_Flight: {
-                        mw.deleteFlight(transcationID, Integer.parseInt(operation.getKey()));
+                        mw.undoAddFlights(transcationID, Integer.parseInt(operation.getKey()));
                         break;
                     }
                     case Set_Customer: {
@@ -155,9 +155,6 @@ public class Transaction {
                 System.out.println("RMI exception:" + e.getMessage());
                 System.out.println("MW:UndoOperation for xid:" + transcationID + " failed");
                 return false;
-            }
-            catch (DeadlockException|InvalidTransactionException|TranscationAbortedException e){
-                System.out.println("SOMETHING STRANGE HAPPENED!!!!!!");
             }
             operation = undoOperationsList.pollLast();
         }
