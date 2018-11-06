@@ -27,7 +27,7 @@ public class TransactionManager {
 
     //assign xid upon request
     public synchronized int start() throws RemoteException{
-        Transaction t = new Transaction(xid);
+        Transaction t = new Transaction(xid, middleware, lm);
         transactionList.put(xid, t);
         xid ++;
         t.transactionSuspend();

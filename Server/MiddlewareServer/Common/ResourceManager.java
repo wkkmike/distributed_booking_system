@@ -32,7 +32,7 @@ public class ResourceManager implements IMiddleware
 
 	//changes start
 	private LockManager LM = new LockManager();
-	private TransactionManager TM = new TransactionManager();
+	private TransactionManager TM = new TransactionManager(this, LM);
 	//changes end
 
 	public ResourceManager(String p_name)
