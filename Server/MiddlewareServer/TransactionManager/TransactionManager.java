@@ -39,8 +39,7 @@ public class TransactionManager {
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(xid, "no such transaction");
-
-        return false;
+        return transaction.commit();
     }
 
     public boolean transactionInvoke(int transactionId) throws InvalidTransactionException, TranscationAbortedException{

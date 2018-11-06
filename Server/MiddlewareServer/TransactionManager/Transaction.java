@@ -57,6 +57,12 @@ public class Transaction {
         return true;
     }
 
+    public boolean commit() throws TranscationAbortedException{
+        if(aborted)
+            throw new TranscationAbortedException(transcationID, "This transaction has been aborted");
+        return lm.UnlockAll(transcationID);
+    }
+
     public void transactionSuspend(){
         scheduler = Executors.newScheduledThreadPool(1);
         scheduler.schedule(new Runnable() {
@@ -87,7 +93,11 @@ public class Transaction {
         return returnList;
     }
 
-    public boolean abort(){
+    public synchronized boolean abort(){
+        if(aborted){
+            System.out.println("MW::abort [xid:" + transcationID + "] has been aborted");
+            return false;
+        }
         undoOperation operation = undoOperationsList.pollLast();
         while (operation != null) {
             try {
@@ -146,7 +156,7 @@ public class Transaction {
                 System.out.println("MW:UndoOperation for xid:" + transcationID + " failed");
                 return false;
             }
-            catch (DeadlockException|InvalidTransactionException e){
+            catch (DeadlockException|InvalidTransactionException|TranscationAbortedException e){
                 System.out.println("SOMETHING STRANGE HAPPENED!!!!!!");
             }
             operation = undoOperationsList.pollLast();
