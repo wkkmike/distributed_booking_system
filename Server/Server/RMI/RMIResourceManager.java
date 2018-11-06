@@ -21,7 +21,6 @@ public class RMIResourceManager extends ResourceManager
 {
 	private static String s_serverName = "Server";
 	private static String s_rmiPrefix = "group15";
-	private static Registry l_registry;
 
 	public static void main(String args[])
 	{
@@ -39,7 +38,7 @@ public class RMIResourceManager extends ResourceManager
 			IResourceManager resourceManager = (IResourceManager)UnicastRemoteObject.exportObject(server, 0);
 
 			// Bind the remote object's stub in the registry
-			//Registry l_registry;
+			Registry l_registry;
 			try {
 				l_registry = LocateRegistry.createRegistry(1099);
 			} catch (RemoteException e) {
@@ -84,7 +83,7 @@ public class RMIResourceManager extends ResourceManager
 		Registry registry = LocateRegistry.getRegistry(1099);
 		try{
 			// Unregister ourself
-			l_registry.unbind(s_rmiPrefix + s_serverName);
+			//registry.unbind(s_rmiPrefix + s_serverName);
 
 			// Unexport; this will also remove us from the RMI runtime
 			UnicastRemoteObject.unexportObject(this, true);
