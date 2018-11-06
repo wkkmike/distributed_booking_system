@@ -54,7 +54,7 @@ public class Transaction {
         if(aborted){
             return false;
         }
-        scheduler.shutdown();
+        scheduler.shutdownNow();
         return true;
     }
 
@@ -150,6 +150,7 @@ public class Transaction {
             catch (DeadlockException|InvalidTransactionException e){
                 System.out.println("SOMETHING STRANGE HAPPENED!!!!!!");
             }
+            operation = undoOperationsList.pollLast();
         }
         System.out.println("MW_Transaction:UndoOperation for xid:" + transcationID + " finished");
         aborted = true;

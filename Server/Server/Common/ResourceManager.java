@@ -108,6 +108,8 @@ public class ResourceManager implements IResourceManager
 	private ReservableItem getItem(int xid, String key){
 	    Trace.info("RM:getItem(" + xid + ", " + key + ") called");
 	    ReservableItem curObj = (ReservableItem)readData(xid, key);
+	    if(curObj == null)
+	    	return null;
 	    return (ReservableItem) curObj.clone();
     }
 
@@ -127,6 +129,8 @@ public class ResourceManager implements IResourceManager
     public Customer getCustomer(int xid, int customerId) throws RemoteException{
 	    Trace.info("RM:getCustomer(" + xid + ", " + customerId + ") called");
 	    Customer customer = (Customer)readData(xid, Customer.getKey(customerId));
+	    if(customer == null)
+	    	return null;
 	    return (Customer) customer.clone();
     }
 

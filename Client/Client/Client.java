@@ -3,6 +3,7 @@ package Client;
 import MiddlewareServer.Interface.IMiddleware;
 
 
+
 import java.util.*;
 import java.io.*;
 import java.rmi.RemoteException;
@@ -103,6 +104,7 @@ public abstract class Client
 							System.out.println("Flight could not be added");
 						}
 					} catch (Exception e) {
+
 						System.out.println(e.getMessage());
 					}
 					break;
@@ -434,11 +436,8 @@ public abstract class Client
 					System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
 
 					int xid = toInt(arguments.elementAt(1));
-					try {
-						m_resourceManager.commit(xid);
-					} catch (Exception e) {
-						System.out.println(e.getMessage());
-					}
+					m_resourceManager.commit(xid);
+					break;
 				}
 				case Quit:
 					checkArgumentsCount(1, arguments.size());

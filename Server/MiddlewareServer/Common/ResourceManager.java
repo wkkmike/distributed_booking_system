@@ -86,11 +86,13 @@ public class ResourceManager implements IMiddleware
 				TM.addRM(xid, Transaction.RM.RM_F);
 				ReservableItem flight = m_resourceManager_f.getFlight(xid, flightNum);
 				// No such flight before, undo operation should delete this entry;
-				if(flight == null)
+				if(flight == null) {
 					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Flight, Integer.toString(flightNum)));
+				}
 				// Have such flight, the add is actually a update operation. Undo operation reset the flight.
-				else
+				else {
 					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Flight, flight));
+				}
 				return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
 			}
 		}
