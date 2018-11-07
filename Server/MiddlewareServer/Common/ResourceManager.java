@@ -17,6 +17,7 @@ import Server.Common.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.Key;
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
@@ -802,40 +803,54 @@ public class ResourceManager implements IMiddleware
 	public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws
 			RemoteException, InvalidTransactionException, DeadlockException, TranscationAbortedException
 	{
-//        Boolean flag = true;
-//		for(String flightNumber: flightNumbers){
-//			if(queryFlight(xid, Integer.parseInt(flightNumber)) <= 0){
-//				return false;
-//			}
-//		}
-//		if(car){
-//			if(queryCars(xid, location) <= 0){
-//				return false;
-//			}
-//		}
-//		if(room){
-//			if(queryRooms(xid, location) <= 0){
-//				return false;
-//			}
-//		}
-//
-//		for(String flightNumber: flightNumbers){
-//            if(!reserveFlight(xid, customerId, Integer.parseInt(flightNumber))){
-//            	flag = false;
-//			}
-//        }
-//        if(car){
-//            if(!reserveCar(xid, customerId, location)){
-//            	flag = false;
-//			}
-//        }
-//        if(room){
-//            if(!reserveRoom(xid, customerId, location)){
-//            	flag = false;
-//			}
-//        }
-//		if(flag) return true;
-		return false;
+        Boolean flag = true;
+		HashMap<String, Integer> flights = new HashMap<String, Integer>();
+
+		for(String flightNumber: flightNumbers){
+			if(flights.containsKey(flightNumber)){
+				flights.put(flightNumber,flights.get(flightNumber)+1);
+			}else{
+				flights.put(flightNumber,1);
+			}
+		}
+
+        for(String flightNumber: flightNumbers){
+			if(queryFlight(xid, Integer.parseInt(flightNumber)) < flights.get(flightNumber) ||
+					!LM.Lock(xid,"flight-"+flightNumber,TransactionLockObject.LockType.LOCK_WRITE)){
+				return false;
+			}
+		}
+
+		if(car){
+			if(queryCars(xid, location) <= 0 ||
+					!LM.Lock(xid, "car-" + location, TransactionLockObject.LockType.LOCK_WRITE)){
+				return false;
+			}
+		}
+		if(room){
+			if(queryRooms(xid, location) <= 0 ||
+					!LM.Lock(xid, "room-" + location, TransactionLockObject.LockType.LOCK_WRITE)){
+				return false;
+			}
+		}
+
+		for(String flightNumber: flightNumbers){
+            if(!reserveFlight(xid, customerId, Integer.parseInt(flightNumber))){
+            	flag = false;
+			}
+        }
+        if(car){
+            if(!reserveCar(xid, customerId, location)){
+            	flag = false;
+			}
+        }
+        if(room){
+            if(!reserveRoom(xid, customerId, location)){
+            	flag = false;
+			}
+        }
+		return flag;
+
 	}
 
 	public String getName() throws RemoteException
