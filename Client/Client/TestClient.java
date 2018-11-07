@@ -1,6 +1,7 @@
 package Client;
 
 import java.util.Date;
+import java.util.Random;
 
 public class TestClient extends RMIClient {
     private Date date = new Date();
@@ -44,6 +45,8 @@ public class TestClient extends RMIClient {
     public double test1(){
         int count = 0;
         int totalTime = 0;
+        Random random = new Random(date.getTime());
+
         try{
             for(int i=1; i<= testTimes; i++){
                 long currentTime = date.getTime();
@@ -52,7 +55,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.commit(xid);
                 totalTime += date.getTime() - currentTime;
                 count++;
-                Thread.sleep(transactionTime - (date.getTime() - currentTime));
+                Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
             }
         }
         catch (Exception e){
