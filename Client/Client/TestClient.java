@@ -48,39 +48,59 @@ public class TestClient extends RMIClient {
 
     public double test1(){
         Random random = new Random(date.getTime());
-        long currentTime = date.getTime();
+        long totalTime = 0;
         try{
             for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
                 int xid = m_resourceManager.start();
                 m_resourceManager.deleteFlight(xid, i);
                 m_resourceManager.commit(xid);
-                Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
             }
         }
         catch (Exception e){
 
         }
-        long time = date.getTime() - currentTime;
-        return (double) time / testTimes;
+        return (double) totalTime / testTimes;
     }
 
     public double test2(){
         Random random = new Random(date.getTime());
-        long currentTime = date.getTime();
+        long totalTime = 0;
         try{
-            for(int i=1; i<= testTimes/3; i++){
+            for(int i=1; i<= testTimes*3/5; i++){
+                long startTime = System.currentTimeMillis();
                 int xid = m_resourceManager.start();
                 m_resourceManager.deleteFlight(xid, i);
                 m_resourceManager.deleteCars(xid, Integer.toString(i));
                 m_resourceManager.deleteRooms(xid, Integer.toString(i));
                 m_resourceManager.commit(xid);
-                Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
             }
         }
         catch (Exception e){
 
         }
-        long time = date.getTime() - currentTime;
-        return (double) time / testTimes;
+        return (double) totalTime / testTimes;
+    }
+
+    public double test3(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes*3/2; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+            }
+        }
+        catch (Exception e){
+
+        }
+        return (double) totalTime / testTimes;
     }
 }
