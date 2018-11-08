@@ -16,6 +16,9 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RMIResourceManager extends ResourceManager 
 {
@@ -87,6 +90,13 @@ public class RMIResourceManager extends ResourceManager
 
 			// Unexport; this will also remove us from the RMI runtime
 			UnicastRemoteObject.unexportObject(this, true);
+			ScheduledExecutorService scheduler =
+					Executors.newScheduledThreadPool(1);
+			scheduler.schedule(new Runnable() {
+				public void run() {
+					System.out.println("Server " + s_serverName + " exit");
+					System.exit(1);}
+			}, 500, TimeUnit.MILLISECONDS);
 
 			Trace.info("RM::" + s_rmiPrefix + s_serverName + " shutdown");
 		}
