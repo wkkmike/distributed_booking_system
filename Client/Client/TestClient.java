@@ -36,6 +36,8 @@ public class TestClient extends RMIClient {
             int xid = m_resourceManager.start();
             for(int i=1; i<10001; i++) {
                 m_resourceManager.addFlight(1, i, 10, 10);
+                m_resourceManager.addCars(1,Integer.toString(i), 10, 10);
+                m_resourceManager.addRooms(1,Integer.toString(i), 10, 10);
             }
             m_resourceManager.commit(xid);
         }
@@ -51,6 +53,26 @@ public class TestClient extends RMIClient {
             for(int i=1; i<= testTimes; i++){
                 int xid = m_resourceManager.start();
                 m_resourceManager.deleteFlight(xid, i);
+                m_resourceManager.commit(xid);
+                Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
+            }
+        }
+        catch (Exception e){
+
+        }
+        long time = date.getTime() - currentTime;
+        return (double) time / testTimes;
+    }
+
+    public double test2(){
+        Random random = new Random(date.getTime());
+        long currentTime = date.getTime();
+        try{
+            for(int i=1; i<= testTimes/3; i++){
+                int xid = m_resourceManager.start();
+                m_resourceManager.deleteFlight(xid, i);
+                m_resourceManager.deleteCars(xid, Integer.toString(i));
+                m_resourceManager.deleteRooms(xid, Integer.toString(i));
                 m_resourceManager.commit(xid);
                 Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
             }
