@@ -45,24 +45,20 @@ public class TestClient extends RMIClient {
     }
 
     public double test1(){
-        int count = 0;
-        int totalTime = 0;
         Random random = new Random(date.getTime());
-
+        long currentTime = date.getTime();
         try{
             for(int i=1; i<= testTimes; i++){
-                long currentTime = date.getTime();
                 int xid = m_resourceManager.start();
                 m_resourceManager.deleteFlight(xid, i);
                 m_resourceManager.commit(xid);
-                totalTime += date.getTime() - currentTime;
-                count++;
                 Thread.sleep(transactionTime - (date.getTime() - currentTime) + (random.nextInt(11) - 5));
             }
         }
         catch (Exception e){
 
         }
-        return (double) totalTime / count;
+        long time = date.getTime() - currentTime;
+        return (double) time / testTimes;
     }
 }
