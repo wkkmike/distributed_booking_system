@@ -7,11 +7,17 @@ import java.util.Vector;
 public class TestClient extends RMIClient {
     private Date date = new Date();
     private final int testTimes = 1000;
-    private final long transactionTime = 500;
+    private final long transactionTime = 1000 / 250;
+    private static String clientNum = "0";
 
     public static void main(String args[]){
         System.setSecurityManager(null);
 
+
+        if(args.length > 0)
+        {
+            clientNum = args[0];
+        }
         // Set the security policy
         if (System.getSecurityManager() == null)
         {
@@ -27,22 +33,91 @@ public class TestClient extends RMIClient {
             e.printStackTrace();
             System.exit(1);
         }
+        try {
+            Random random = new Random(System.currentTimeMillis());
+            Thread.sleep(random.nextInt(10));
 
-        System.out.println("\nsingle add flight average response time is: "+client.addFlight() + "\n");
-        System.out.println("\nsingle add cars average response time is: "+client.addCars() + "\n");
-        System.out.println("\nsingle add rooms average response time is: "+client.addRooms() + "\n");
-        System.out.println("\nsingle add customer average response time is: "+client.addCus() + "\n");
+        }
+        catch (Exception e){
 
-        System.out.println("\nsingle reserve bundle average response time is: "+client.bundle() + "\n");
-        System.out.println("\nsingle reserve flight average response time is: "+client.reserveFlight() + "\n");
-        System.out.println("\nsingle reserve car average response time is: "+client.reserveCar() + "\n");
-        System.out.println("\nsingle reserve room average response time is: "+client.reserveRoom() + "\n");
-        System.out.println("\nsingle delete customer average response time is: "+client.deleteCus() + "\n");
-        System.out.println("\nsingle delete flight average response time is: "+client.deleteFlight() + "\n");
-        System.out.println("\nsingle delete car average response time is: "+client.deleteCar() + "\n");
-        System.out.println("\nsingle delete room average response time is: "+client.deleteRoom() + "\n");
-
+        }
+        part2(client);
         System.exit(0);
+    }
+
+    public static void part2(TestClient client){
+//        if(toInt(clientNum)%2==0) {
+            System.out.println("add cars average response time is: " + client.addCars(toInt(clientNum)) + " ms\n");
+//        }else {
+//            System.out.print2s average response time is: " + client.addRooms(toInt(clientNum)) + " ms\n");
+//        }
+
+    }
+
+
+    public static void part1(TestClient client){
+        client.initialize();
+        client.startCommit();
+        System.out.println("only start and commit, average response time is: "+client.startCommit()+" ms\n");
+
+        System.out.println("single add cars average response time is: "+client.addCars() + " ms\n");
+        System.out.println("single add flight average response time is: "+client.addFlight() + " ms\n");
+        System.out.println("single add rooms average response time is: "+client.addRooms() + " ms\n");
+        System.out.println("single add customer average response time is: "+client.addCus() + " ms\n");
+
+        System.out.println("addcar,addflight,addroom, response time is: " + client.addFlightCarRoom() +" ms\n");
+        System.out.println("addcar,addcar,addcar, response time is: " + client.addCarCarCar() +" ms\n");
+
+        System.out.println("single query flight average response time is: "+client.queryFlight() + " ms\n");
+        System.out.println("single query car average response time is: "+client.queryCars() + " ms\n");
+        System.out.println("single query room average response time is: "+client.queryRooms() + " ms\n");
+
+        System.out.println("single reserve bundle average response time is: "+client.bundle() + " ms\n");
+        System.out.println("single reserve flight average response time is: "+client.reserveFlight() + " ms\n");
+        System.out.println("single reserve car average response time is: "+client.reserveCar() + " ms\n");
+        System.out.println("single reserve room average response time is: "+client.reserveRoom() + " ms\n");
+        System.out.println("single delete customer average response time is: "+client.deleteCus() + " ms\n");
+        System.out.println("single delete flight average response time is: "+client.deleteFlight() + " ms\n");
+        System.out.println("single delete car average response time is: "+client.deleteCar() + " ms\n");
+        System.out.println("single delete room average response time is: "+client.deleteRoom() + " ms\n");
+    }
+
+    public double addCars(int index){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.addCars(xid,Integer.toString(i+index*1000), 10, 10);
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (double) totalTime / testTimes;
+    }
+
+    public double addRooms(int index){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.addRooms(xid, Integer.toString(i+index*1000),10,10);
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+
+        }
+        return (double) totalTime / testTimes;
     }
 
     public void initialize(){
@@ -60,6 +135,66 @@ public class TestClient extends RMIClient {
         }
     }
 
+    public double addFlightCarRoom(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.addFlight(xid, i, 10, 10);
+                m_resourceManager.addCars(xid,Integer.toString(i), 10, 10);
+                m_resourceManager.addRooms(xid,Integer.toString(i), 10, 10);
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (double) totalTime / testTimes;
+    }
+
+    public double addCarCarCar(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.addCars(xid,Integer.toString(i), 10, 10);
+                m_resourceManager.addCars(xid,Integer.toString(i), 10, 10);
+                m_resourceManager.addCars(xid,Integer.toString(i), 10, 10);
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (double) totalTime / testTimes;
+    }
+
+    public double startCommit(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (double) totalTime / testTimes;
+    }
+
     public double addFlight(){
         Random random = new Random(date.getTime());
         long totalTime = 0;
@@ -70,7 +205,26 @@ public class TestClient extends RMIClient {
                 m_resourceManager.addFlight(xid, i,10,10);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(Math.min(0,Math.abs(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (double) totalTime / testTimes;
+    }
+
+    public double queryFlight(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.queryFlight(xid, i);
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
             }
         }
         catch (Exception e){
@@ -89,7 +243,27 @@ public class TestClient extends RMIClient {
                 m_resourceManager.addCars(xid, Integer.toString(i),10,10);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+
+        }
+        return (double) totalTime / testTimes;
+    }
+
+
+    public double queryCars(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.queryCars(xid, Integer.toString(i));
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
             }
         }
         catch (Exception e){
@@ -108,7 +282,26 @@ public class TestClient extends RMIClient {
                 m_resourceManager.addRooms(xid, Integer.toString(i),10,10);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
+            }
+        }
+        catch (Exception e){
+
+        }
+        return (double) totalTime / testTimes;
+    }
+
+    public double queryRooms(){
+        Random random = new Random(date.getTime());
+        long totalTime = 0;
+        try{
+            for(int i=1; i<= testTimes; i++){
+                long startTime = System.currentTimeMillis();
+                int xid = m_resourceManager.start();
+                m_resourceManager.queryRooms(xid, Integer.toString(i));
+                m_resourceManager.commit(xid);
+                totalTime += System.currentTimeMillis() - startTime;
+                Thread.sleep(Math.max(0,transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5)));
             }
         }
         catch (Exception e){
@@ -127,7 +320,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.newCustomer(xid, i);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -148,7 +341,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.bundle(xid, i, v, Integer.toString(i), true, true);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -167,7 +360,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.reserveFlight(xid, i, i);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -186,7 +379,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.reserveCar(xid, i, Integer.toString(i));
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -205,7 +398,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.reserveRoom(xid, i, Integer.toString(i));
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -224,7 +417,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.deleteCustomer(xid, i);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -243,7 +436,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.deleteFlight(xid, i);
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -262,7 +455,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.deleteCars(xid, Integer.toString(i));
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
@@ -281,7 +474,7 @@ public class TestClient extends RMIClient {
                 m_resourceManager.deleteRooms(xid, Integer.toString(i));
                 m_resourceManager.commit(xid);
                 totalTime += System.currentTimeMillis() - startTime;
-                Thread.sleep(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5));
+                Thread.sleep(Math.max(0,(transactionTime - (System.currentTimeMillis() - startTime) + (random.nextInt(11) - 5))));
             }
         }
         catch (Exception e){
