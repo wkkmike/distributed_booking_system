@@ -458,6 +458,7 @@ public abstract class Client
 					System.out.println("Shutdown all server.");
 					m_resourceManager.shutdown();
 					System.out.println("Shutdown all server success");
+					System.exit(0);
 					break;
 				}
 				case Quit:

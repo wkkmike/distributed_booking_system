@@ -822,12 +822,14 @@ public class ResourceManager implements IMiddleware
 		}
 
 		if(car){
+			System.out.println("1");
 			if(queryCars(xid, location) <= 0 ||
 					!LM.Lock(xid, "car-" + location, TransactionLockObject.LockType.LOCK_WRITE)){
 				return false;
 			}
 		}
 		if(room){
+			System.out.println("2");
 			if(queryRooms(xid, location) <= 0 ||
 					!LM.Lock(xid, "room-" + location, TransactionLockObject.LockType.LOCK_WRITE)){
 				return false;
@@ -839,12 +841,16 @@ public class ResourceManager implements IMiddleware
             	flag = false;
 			}
         }
+		System.out.println("6");
         if(car){
+			System.out.println("3");
             if(!reserveCar(xid, customerId, location)){
+				System.out.println("5");
             	flag = false;
 			}
         }
         if(room){
+			System.out.println("4");
             if(!reserveRoom(xid, customerId, location)){
             	flag = false;
 			}

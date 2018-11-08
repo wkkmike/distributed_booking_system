@@ -27,6 +27,8 @@ public class TestClient extends RMIClient {
             System.exit(1);
         }
         client.initialize();
+        System.out.println("average response time is :"+client.test1());
+        System.exit(0);
     }
 
     public void initialize(){
