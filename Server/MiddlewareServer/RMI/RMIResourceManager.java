@@ -5,19 +5,22 @@
 
 package MiddlewareServer.RMI;
 
-import Server.Interface.*;
+import MiddlewareServer.Interface.IMiddleware;
 import MiddlewareServer.Common.*;
+import Server.Common.Trace;
 
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RMIResourceManager extends ResourceManager
 {
 	private static String s_serverName = "MiddlewareServer";
 	private static String s_rmiPrefix = "group15";
-
 
 	private static String s_serverHost_Flight = "localhost";
 	private static int s_serverPort_Flight = 1099;
@@ -37,6 +40,7 @@ public class RMIResourceManager extends ResourceManager
 
 	public static void main(String args[])
 	{
+		System.setSecurityManager(null);
 		if(args.length > 0)
 		{
 			s_serverHost_Flight = args[0];
@@ -61,7 +65,7 @@ public class RMIResourceManager extends ResourceManager
 		RMIResourceManager server = new RMIResourceManager(s_serverName);
 		try {
 			// Dynamically generate the stub (client proxy)
-			IResourceManager resourceManager = (IResourceManager)UnicastRemoteObject.exportObject(server, 0);
+			IMiddleware resourceManager = (IMiddleware)UnicastRemoteObject.exportObject(server, 0);
 
 			// Bind the remote object's stub in the registry
 			Registry l_registry;
@@ -130,6 +134,39 @@ public class RMIResourceManager extends ResourceManager
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
 			e.printStackTrace();
 			System.exit(1);
+		}
+		return true;
+	}
+
+	public boolean shutdown() throws RemoteException{
+		try {
+			m_resourceManager_c.shutdown();
+			m_resourceManager_cus.shutdown();
+			m_resourceManager_f.shutdown();
+			m_resourceManager_r.shutdown();
+		}
+		catch (RemoteException e){
+			Trace.error("RM::Shutdown server failed." + e.getMessage());
+		}
+
+		Registry registry = LocateRegistry.getRegistry(1099);
+		try{
+			// Unregister ourself
+			//registry.unbind(s_rmiPrefix + s_serverName);
+
+			// Unexport; this will also remove us from the RMI runtime
+			UnicastRemoteObject.unexportObject(this, true);
+			ScheduledExecutorService scheduler =
+					Executors.newScheduledThreadPool(1);
+			scheduler.schedule(new Runnable() {
+				public void run() {
+					System.out.println("Server " + s_serverName + " exit");
+					System.exit(1);}
+			}, 500, TimeUnit.MILLISECONDS);
+			Trace.info("RM::" + s_rmiPrefix + s_serverName + " shutdown");
+		}
+		catch(Exception e){
+			Trace.info("RM::Problem during shutdown: " + e.getMessage());
 		}
 		return true;
 	}

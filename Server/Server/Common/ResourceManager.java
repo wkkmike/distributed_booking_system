@@ -9,7 +9,6 @@ import Server.Interface.*;
 
 import java.util.*;
 import java.rmi.RemoteException;
-import java.io.*;
 
 public class ResourceManager implements IResourceManager
 {
@@ -104,6 +103,71 @@ public class ResourceManager implements IResourceManager
 		return value;        
 	}
 
+	// Return a reservable item, used by TM for undo operation.
+    // return null, if no such object.
+	private ReservableItem getItem(int xid, String key){
+	    Trace.info("RM:getItem(" + xid + ", " + key + ") called");
+	    ReservableItem curObj = (ReservableItem)readData(xid, key);
+	    if(curObj == null)
+	    	return null;
+	    return (ReservableItem) curObj.clone();
+    }
+
+    public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{
+	    return getItem(xid, Flight.getKey(flightNum));
+    }
+
+    public ReservableItem getCar(int xid, String location) throws RemoteException{
+	    return getItem(xid, Car.getKey(location));
+    }
+
+    public ReservableItem getRoom(int xid, String location) throws RemoteException{
+	    return getItem(xid, Room.getKey(location));
+    }
+
+    // Return a customer by key, used by TM for undo operation.
+    public Customer getCustomer(int xid, int customerId) throws RemoteException{
+	    Trace.info("RM:getCustomer(" + xid + ", " + customerId + ") called");
+	    Customer customer = (Customer)readData(xid, Customer.getKey(customerId));
+	    if(customer == null)
+	    	return null;
+	    return (Customer) customer.clone();
+    }
+
+    // For undo operation, reset customer.
+    public void setCustomer(int xid, Customer customer) throws RemoteException{
+	    Trace.info("RM:setCustomer(" + xid + ")called");
+	    Trace.info("RM:" + customer);
+	    writeData(xid, customer.getKey(), customer);
+    }
+
+	@Override
+	public boolean shutdown() throws RemoteException {
+		return false;
+	}
+
+	// For undo operation. reset the item.
+    private void setItem(int xid, ReservableItem obj) throws RemoteException{
+	    Trace.info("RM:setItem(" + xid + ")called");
+	    Trace.info("RM: " + obj);
+	    writeData(xid, obj.getKey(), obj);
+    }
+
+	@Override
+	public void setFlight(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
+
+	@Override
+	public void setCar(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
+
+	@Override
+	public void setRoom(int xid, ReservableItem obj) throws RemoteException {
+		setItem(xid, obj);
+	}
+
 	// Check the existens of a customer. Only used by customer server
 	public boolean checkCustomer(int xid, int customerID) throws RemoteException{
 		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
@@ -111,7 +175,7 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
-	// Reserve an item fro customer server.
+	// Reserve an item for customer server.
 	public boolean reserveItem_cus(int xid, int customerID, String key, String location, int price) throws RemoteException{
 		Customer customer = (Customer) readData(xid, Customer.getKey(customerID));
 		if(customer == null)
@@ -205,6 +269,25 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
+	// Undo add flight operation. Only for update operation.
+	public boolean undoAddFlights(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException
+	{
+		Trace.info("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
+		Flight curObj = (Flight)readData(xid, Flight.getKey(flightNum));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") failed, no such flight");
+			return false;
+		}
+		else{
+			curObj.setCount(flightSeats);
+			curObj.setPrice(flightPrice);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddFlights(" + + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") success");
+		}
+		return true;
+	}
+
 	// Create a new car location or add cars to an existing location
 	// NOTE: if price <= 0 and the location already exists, it maintains its current price
 	public boolean addCars(int xid, String location, int count, int price) throws RemoteException
@@ -232,6 +315,25 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
+	// Undo add Cars operation. Only for update operation.
+	public boolean undoAddCars(int xid, String location, int count, int price) throws RemoteException
+	{
+		Trace.info("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") called");
+		Car curObj = (Car)readData(xid, Car.getKey(location));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") failed, no such car");
+			return false;
+		}
+		else{
+			curObj.setCount(count);
+			curObj.setPrice(price);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddCars(" + + xid + ", " + location + ", " + count + ", $" + price + ") success");
+		}
+		return true;
+	}
+
 	// Create a new room location or add rooms to an existing location
 	// NOTE: if price <= 0 and the room location already exists, it maintains its current price
 	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException
@@ -253,6 +355,25 @@ public class ResourceManager implements IResourceManager
 			}
 			writeData(xid, curObj.getKey(), curObj);
 			Trace.info("RM::addRooms(" + xid + ") modified existing location " + location + ", count=" + curObj.getCount() + ", price=$" + price);
+		}
+		return true;
+	}
+
+	// Undo add Rooms operation. Only for update operation.
+	public boolean undoAddRooms(int xid, String location, int count, int price) throws RemoteException
+	{
+		Trace.info("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") called");
+		Room curObj = (Room)readData(xid, Room.getKey(location));
+		if(curObj == null){
+			// Doesn't have this object, something wrong.
+			Trace.error("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") failed, no such room");
+			return false;
+		}
+		else{
+			curObj.setCount(count);
+			curObj.setPrice(price);
+			writeData(xid, curObj.getKey(), curObj);
+			Trace.info("RM::undoAddRooms(" + + xid + ", " + location + ", " + count + ", $" + price + ") success");
 		}
 		return true;
 	}
@@ -360,6 +481,35 @@ public class ResourceManager implements IResourceManager
 		}
 	}
 
+	public HashMap<String, Integer> getCustomerReservations(int xid, int customerID) throws RemoteException{
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") called");
+		Customer customer = (Customer)readData(xid, Customer.getKey(customerID));
+		if(customer == null){
+			Trace.warn("RM::getCustomerReservations(" + xid + ", " + customerID + ") failed--customer doesn't exist");
+			return null;
+		}
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") success");
+		RMHashMap reservations = customer.getReservations();
+		HashMap<String, Integer> reservationList = new HashMap<String, Integer>();
+		for(String reservedKey: reservations.keySet()){
+			ReservedItem reserveditem = customer.getReservedItem(reservedKey);
+			Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") has reserved " + reserveditem.getKey() + " " +  reserveditem.getCount() +  " times");
+			reservationList.put(reserveditem.getKey(), reserveditem.getCount());
+		}
+		Trace.info("RM::getCustomerReservations(" + xid + ", " + customerID + ") success");
+		return reservationList;
+	}
+
+	public void reduceReservations(int xid, String key, int num) throws RemoteException{
+		Trace.info("RM::reduceReservations(" + xid + ") called");
+		ReservableItem item = (ReservableItem) readData(xid, key);
+		item.setReserved(item.getReserved() - num);
+		item.setCount(item.getCount() + num);
+		Trace.info("RM::" + key + " decrease " + num + " reservations.");
+		writeData(xid, item.getKey(), item);
+		Trace.info("RM::reduceReservations(" + xid + ") success");
+	}
+
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException
 	{
 		Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
@@ -372,7 +522,8 @@ public class ResourceManager implements IResourceManager
 		else
 		{            
 			// Increase the reserved numbers of all reservable items which the customer reserved. 
- 			RMHashMap reservations = customer.getReservations();
+ 			/*
+			RMHashMap reservations = customer.getReservations();
 			for (String reservedKey : reservations.keySet())
 			{        
 				ReservedItem reserveditem = customer.getReservedItem(reservedKey);
@@ -383,7 +534,7 @@ public class ResourceManager implements IResourceManager
 				item.setCount(item.getCount() + reserveditem.getCount());
 				writeData(xid, item.getKey(), item);
 			}
-
+			*/
 			// Remove the customer from the storage
 			removeData(xid, customer.getKey());
 			Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") succeeded");

@@ -5,6 +5,7 @@
 
 package Server.RMI;
 
+import MiddlewareServer.TransactionManager.Transaction;
 import Server.Interface.*;
 import Server.Common.*;
 
@@ -15,6 +16,9 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RMIResourceManager extends ResourceManager 
 {
@@ -76,5 +80,29 @@ public class RMIResourceManager extends ResourceManager
 	public RMIResourceManager(String name)
 	{
 		super(name);
+	}
+
+	public boolean shutdown() throws RemoteException{
+		Registry registry = LocateRegistry.getRegistry(1099);
+		try{
+			// Unregister ourself
+			//registry.unbind(s_rmiPrefix + s_serverName);
+
+			// Unexport; this will also remove us from the RMI runtime
+			UnicastRemoteObject.unexportObject(this, true);
+			ScheduledExecutorService scheduler =
+					Executors.newScheduledThreadPool(1);
+			scheduler.schedule(new Runnable() {
+				public void run() {
+					System.out.println("Server " + s_serverName + " exit");
+					System.exit(1);}
+			}, 500, TimeUnit.MILLISECONDS);
+
+			Trace.info("RM::" + s_rmiPrefix + s_serverName + " shutdown");
+		}
+		catch(Exception e){
+			Trace.info("RM::Problem during shutdown: " + e.getMessage());
+		}
+		return true;
 	}
 }

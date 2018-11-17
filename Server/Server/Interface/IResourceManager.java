@@ -1,5 +1,7 @@
 package Server.Interface;
 
+import Server.Common.Customer;
+import Server.Common.RMHashMap;
 import Server.Common.ReservableItem;
 
 import java.rmi.Remote;
@@ -36,7 +38,7 @@ public interface IResourceManager extends Remote
      * @return Success
      */
     public boolean addFlight(int id, int flightNum, int flightSeats, int flightPrice) 
-	throws RemoteException; 
+	throws RemoteException;
     
     /**
      * Add car at a location.
@@ -230,4 +232,35 @@ public interface IResourceManager extends Remote
      */
     public String getName()
         throws RemoteException;
+
+    public boolean undoAddFlights(int xid, int flightNum, int flightSeats, int flightPrice)
+            throws RemoteException;
+
+    public boolean undoAddRooms(int xid, String location, int count, int price)
+            throws RemoteException;
+
+    public boolean undoAddCars(int xid, String location, int count, int price)
+            throws RemoteException;
+
+    public ReservableItem getFlight(int xid, int flightNum) throws RemoteException;
+
+    public ReservableItem getCar(int xid, String location) throws RemoteException;
+
+    public ReservableItem getRoom(int xid, String location) throws RemoteException;
+
+    public void setFlight(int xid, ReservableItem obj) throws RemoteException;
+
+    public void setCar(int xid, ReservableItem obj) throws RemoteException;
+
+    public void setRoom(int xid, ReservableItem obj) throws RemoteException;
+
+    public Customer getCustomer(int xid, int customerId) throws RemoteException;
+
+    public void setCustomer(int xid, Customer customer) throws RemoteException;
+
+    public boolean shutdown() throws RemoteException;
+
+    public HashMap<String, Integer> getCustomerReservations(int xid, int customerID) throws RemoteException;
+
+    public void reduceReservations(int xid, String key, int num) throws RemoteException;
 }

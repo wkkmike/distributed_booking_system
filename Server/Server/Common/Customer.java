@@ -46,6 +46,27 @@ public class Customer extends RMItem
 		m_reservations.put(reservedItem.getKey(), reservedItem);
 	}
 
+	public boolean undoReserve(String key, String location, int price, int amount)
+	{
+		ReservedItem reservedItem = getReservedItem(key);
+		if(reservedItem == null){
+			// Customer don't have this item in bill, something wrong.
+			return false;
+		}
+		else{
+			reservedItem.setCount(amount);
+			reservedItem.setPrice(price);
+		}
+		if(reservedItem.getCount() == 0){
+			// Remove the item from customer reservation, if the count is 0;
+			m_reservations.remove(reservedItem.getKey());
+		}
+		else{
+			m_reservations.put(reservedItem.getKey(), reservedItem);
+		}
+		return true;
+	}
+
 	public ReservedItem getReservedItem(String key)
 	{
 		return (ReservedItem)m_reservations.get(key);

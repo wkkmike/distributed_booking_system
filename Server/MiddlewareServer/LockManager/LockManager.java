@@ -1,4 +1,4 @@
-package Server.LockManager;
+package MiddlewareServer.LockManager;
 
 import Server.Common.*;
 
@@ -63,8 +63,15 @@ public class LockManager
 						}
 
 						if (bConvert.get(0) == true) {
-							//TODO: Lock conversion 
-							// Trace.info("LM::lock(" + xid + ", " + data + ", " + lockType + ") converted");
+							TransactionLockObject xPreLock = new TransactionLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
+							DataLockObject dataPreLock = new DataLockObject(xid, data, TransactionLockObject.LockType.LOCK_READ);
+							if(!this.lockTable.remove(xPreLock))
+								return false;
+							if(!this.lockTable.remove(dataPreLock))
+								return false;
+							this.lockTable.add(xLockObject);
+							this.lockTable.add(dataLockObject);
+							Trace.info("LM::lock(" + xid + ", " + data + ", " + lockType + ") converted");
 						} else {
 							// Lock request that is not lock conversion
 							this.lockTable.add(xLockObject);
@@ -226,8 +233,27 @@ public class LockManager
 					// (1) transaction already had a READ lock
 					// (2) transaction already had a WRITE lock
 					// Seeing the comments at the top of this function might be helpful
+					if (l_dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE){
+						// Since the transaction already have a write lock, no conversion needed.
+						throw new RedundantLockRequestException(dataLockObject.getXId(), "redundant READ lock request");
+					}
 
-					//TODO: Lock conversion
+					else{
+						// The transaction only have a read lock now, need to check whether other transaction have a read lock.
+						for (int j=0; j<size; j++){
+							DataLockObject t_dataLockObject = (DataLockObject)vect.elementAt(j);
+							// If other transaction have a read lock.
+							if (dataLockObject.getXId() != t_dataLockObject.getXId()){
+								Trace.info("LM::lockConflict(" + dataLockObject.getXId() + ", " + dataLockObject.getDataName() + ") Want convert to" +
+										" WRITE," + t_dataLockObject.getXId() + "has READ lock");
+								return true;
+							}
+						}
+						// Since no other transaction hold lock for this object, we can convert this lock.
+						bitset.set(0);
+						return false;
+					}
+					//TODO: Lock conversion, maybe deadlock. need to throw??
 				}
 			} 
 			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ)
@@ -240,7 +266,7 @@ public class LockManager
 					return true;
 				}
 			}
-		       	else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE)
+			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_WRITE)
 			{
 				// Transaction is requesting a WRITE lock and some other transaction has either
 				// a READ or a WRITE lock on it ==> conflict
