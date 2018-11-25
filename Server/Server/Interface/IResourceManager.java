@@ -269,4 +269,6 @@ public interface IResourceManager extends Remote
     public boolean prepareCommit(int xid) throws RemoteException;
 
     public boolean receiveResult(int xid, boolean result) throws RemoteException;
+
+    public boolean startTransaction(int xid) throws RemoteException;
 }

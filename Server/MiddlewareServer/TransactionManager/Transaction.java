@@ -81,6 +81,24 @@ public class Transaction {
         if(RMList.contains(rm))
             return;
         RMList.add(rm);
+        switch (rm){
+            case RM_C: {
+                mw.startTransaction(transcationID, "cars");
+                break;
+            }
+            case RM_F: {
+                mw.startTransaction(transcationID, "flights");
+                break;
+            }
+            case RM_R:{
+                mw.startTransaction(transcationID, "rooms");
+                break;
+            }
+            case RM_CUS:{
+                mw.startTransaction(transcationID, "customers");
+                break;
+            }
+        }
     }
 
     public void removeRMfromRMList(RM rm){

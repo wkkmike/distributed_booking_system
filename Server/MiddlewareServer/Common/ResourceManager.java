@@ -995,51 +995,73 @@ public class ResourceManager implements IMiddleware
 	public boolean prepareCommit(String rm, int xid) throws RemoteException{
 		if(rm.equals("customers")){
 			if(m_resourceManager_cus.prepareCommit(xid))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
 		}
 		if(rm.equals("cars")){
 			if(m_resourceManager_c.prepareCommit(xid))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
 		}
 		if(rm.equals("flights")){
 			if(m_resourceManager_f.prepareCommit(xid))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
 		}
 		if(rm.equals("rooms")){
 			if(m_resourceManager_r.prepareCommit(xid))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
 		}
-		Trace.info("MW: Resource Manager:" + rm + "vote no.");
+		Trace.info("MW: Resource Manager:" + rm + "vote no for transaction <" + xid + ">");
 		return false;
 	}
 
 	public boolean sendResult(int xid, String rm, boolean result) throws RemoteException{
+		// TODO: Change log info
 		if(rm.equals("customers")){
 			if(m_resourceManager_cus.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("cars")){
 			if(m_resourceManager_c.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("flights")){
 			if(m_resourceManager_f.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("rooms")){
 			if(m_resourceManager_r.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 			return true;
 		}
-		Trace.info("MW: Resource Manager:" + rm + "vote no.");
+		Trace.info("MW: Resource Manager:" + rm + "vote no for transaction <" + xid + ">");
 		return false;
+	}
+
+	public void startTransaction(int xid, String rm){
+		try {
+			if (rm.equals("customers")) {
+				m_resourceManager_cus.startTransaction(xid);
+			}
+			if (rm.equals("cars")) {
+				m_resourceManager_c.startTransaction(xid);
+			}
+			if (rm.equals("flights")) {
+				m_resourceManager_f.startTransaction(xid);
+			}
+			if (rm.equals("rooms")) {
+				m_resourceManager_r.startTransaction(xid);
+			}
+			Trace.info("MW: Resource Manager:" + rm + "start transaction <" + xid + ">");
+		}
+		catch (RemoteException e){
+
+		}
 	}
 }
  

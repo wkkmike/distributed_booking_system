@@ -22,6 +22,7 @@ public class ResourceManager implements IResourceManager
 	protected Boolean masterIsA;
 	protected FileWriter masterWriter;
 	protected FileWriter logWriter;
+	protected HashMap<Integer, RMHashMap> dataHashMap = new HashMap<>();
 
 	public ResourceManager(String p_name)
 	{
@@ -68,8 +69,9 @@ public class ResourceManager implements IResourceManager
 	// Reads a data item
 	protected RMItem readData(int xid, String key)
 	{
-		synchronized(m_data) {
-			RMItem item = m_data.get(key);
+		RMHashMap data = dataHashMap.get(xid);
+		synchronized(data) {
+			RMItem item = data.get(key);
 			if (item != null) {
 				return (RMItem)item.clone();
 			}
@@ -80,16 +82,18 @@ public class ResourceManager implements IResourceManager
 	// Writes a data item
 	protected void writeData(int xid, String key, RMItem value)
 	{
-		synchronized(m_data) {
-			m_data.put(key, value);
+		RMHashMap data = dataHashMap.get(xid);
+		synchronized(data) {
+			data.put(key, value);
 		}
 	}
 
 	// Remove the item out of storage
 	protected void removeData(int xid, String key)
 	{
-		synchronized(m_data) {
-			m_data.remove(key);
+		RMHashMap data = dataHashMap.get(xid);
+		synchronized(data) {
+			data.remove(key);
 		}
 	}
 
@@ -705,15 +709,19 @@ public class ResourceManager implements IResourceManager
 
 
 	public boolean prepareCommit(int xid) throws RemoteException{
+		RMHashMap oldm_data = (RMHashMap) m_data.clone();
+		m_data = (RMHashMap) dataHashMap.get(xid).clone();
 		if(masterIsA){
 			if(!save(fileBName)){
 				write2log(Integer.toString(xid) + " N");
+				m_data = (RMHashMap) oldm_data.clone();
 				return false;
 			}
 		}
 		else{
 			if(!save(fileAName)){
-				write2log(Integer.toString(xid) + " A");
+				write2log(Integer.toString(xid) + " N");
+				m_data = (RMHashMap) oldm_data.clone();
 				return true;
 			}
 		}
@@ -755,6 +763,11 @@ public class ResourceManager implements IResourceManager
 			}
 			write2log(xid + " A");
 		}
+		return true;
+	}
+
+	public boolean startTransaction(int xid) throws RemoteException{
+		dataHashMap.put(xid, (RMHashMap) m_data.clone());
 		return true;
 	}
 }
