@@ -74,7 +74,7 @@ public class ResourceManager implements IMiddleware
 	// Create a new flight, or add seats to existing flight
 	// NOTE: if flightPrice <= 0 and the flight already exists, it maintains its current price
 	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException, RMNotAliveException
 	{
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
 		try{
@@ -117,7 +117,7 @@ public class ResourceManager implements IMiddleware
 	// Create a new car location or add cars to an existing location
 	// NOTE: if price <= 0 and the location already exists, it maintains its current price
 	public boolean addCars(int xid, String location, int count, int price) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -158,7 +158,7 @@ public class ResourceManager implements IMiddleware
 	// Create a new room location or add rooms to an existing location
 	// NOTE: if price <= 0 and the room location already exists, it maintains its current price
 	public boolean addRooms(int xid, String location, int count, int price) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") called");
 
 		try{
@@ -200,7 +200,7 @@ public class ResourceManager implements IMiddleware
 
 	// Deletes flight
 	public boolean deleteFlight(int xid, int flightNum) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::deleteFlight(" + xid + ", " + flightNum + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -236,7 +236,7 @@ public class ResourceManager implements IMiddleware
 
 	// Delete cars at a location
 	public boolean deleteCars(int xid, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::deleteCars(" + xid + ", " + location + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -272,7 +272,7 @@ public class ResourceManager implements IMiddleware
 
 	// Delete rooms at a location
 	public boolean deleteRooms(int xid, String location) throws RemoteException,
-			DeadlockException, InvalidTransactionException, TranscationAbortedException {
+			DeadlockException, InvalidTransactionException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::deleteRooms(" + xid + ", " + location + ") called");
 
 		try{
@@ -309,7 +309,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns the number of empty seats in this flight
 	public int queryFlight(int xid, int flightNum) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -341,7 +341,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns the number of cars available at a location
 	public int queryCars(int xid, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 
 		Trace.info("RM::queryCars(" + xid + ", " + location +") called");
 		try{
@@ -375,7 +375,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns the amount of rooms available at a location
 	public int queryRooms(int xid, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryRooms(" + xid + ", " + location +") called");
 
 		try{
@@ -408,7 +408,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns price of a seat in this flight
 	public int queryFlightPrice(int xid, int flightNum) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -441,7 +441,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns price of cars at this location
 	public int queryCarsPrice(int xid, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryCarsPrice(" + xid + ", " + location +") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -473,7 +473,7 @@ public class ResourceManager implements IMiddleware
 
 	// Returns room price at this location
 	public int queryRoomsPrice(int xid, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryRoomsPrice(" + xid + ", " + location +") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -504,7 +504,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	public String queryCustomerInfo(int xid, int customerID) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID +") called");
 
 		try{
@@ -536,7 +536,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	public int newCustomer(int xid) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::newCustomer(" + xid + ") called");
 
 		try{
@@ -570,7 +570,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	public boolean newCustomer(int xid, int customerID) throws RemoteException,
-			DeadlockException, InvalidTransactionException, TranscationAbortedException {
+			DeadlockException, InvalidTransactionException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") called");
 
 		try{
@@ -607,7 +607,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	public boolean deleteCustomer(int xid, int customerID) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException {
 		Trace.info("RM::deleteCustomer(" + xid + ", " + customerID + ") called");
 		try{
 			TM.transactionInvoke(xid);
@@ -667,7 +667,7 @@ public class ResourceManager implements IMiddleware
 
 	// Adds flight reservation to this customer
 	public boolean reserveFlight(int xid, int customerID, int flightNum) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException{
 		try{
 			TM.transactionInvoke(xid);
 			if(LM.Lock(xid,"flight-"+flightNum,TransactionLockObject.LockType.LOCK_WRITE) &&
@@ -713,7 +713,7 @@ public class ResourceManager implements IMiddleware
 
 	// Adds car reservation to this customer
 	public boolean reserveCar(int xid, int customerID, String location) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException {
+			InvalidTransactionException, DeadlockException, TranscationAbortedException , RMNotAliveException{
 		try {
 			TM.transactionInvoke(xid);
 			if(LM.Lock(xid,"car-"+location,TransactionLockObject.LockType.LOCK_WRITE) &&
@@ -756,7 +756,7 @@ public class ResourceManager implements IMiddleware
 
 	// Adds room reservation to this customer
 	public boolean reserveRoom(int xid, int customerID, String location) throws RemoteException,
-			DeadlockException, InvalidTransactionException, TranscationAbortedException {
+			DeadlockException, InvalidTransactionException, TranscationAbortedException , RMNotAliveException{
 		try {
 			TM.transactionInvoke(xid);
 			if(LM.Lock(xid,"room-"+location,TransactionLockObject.LockType.LOCK_WRITE) &&
@@ -799,7 +799,7 @@ public class ResourceManager implements IMiddleware
 
 	// Reserve bundle 
 	public boolean bundle(int xid, int customerId, Vector<String> flightNumbers, String location, boolean car, boolean room) throws
-			RemoteException, InvalidTransactionException, DeadlockException, TranscationAbortedException
+			RemoteException, InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException
 	{
         Boolean flag = true;
 		HashMap<String, Integer> flights = new HashMap<String, Integer>();
@@ -863,7 +863,7 @@ public class ResourceManager implements IMiddleware
 
 	@Override
 	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
-			InvalidTransactionException, TransactionCommitFailException {
+			InvalidTransactionException, TransactionCommitFailException , RMNotAliveException{
 		Trace.info("MW:commit(xid:" + transactionId +") called");
 		TM.transactionInvoke(transactionId);
 		if(TM.commit(transactionId)){
@@ -876,7 +876,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public void abort(int transactionId) throws RemoteException, InvalidTransactionException {
+	public void abort(int transactionId) throws RemoteException, InvalidTransactionException, RMNotAliveException {
 		try {
 			TM.transactionInvoke(transactionId);
 		}

@@ -689,7 +689,7 @@ public class ResourceManager implements IResourceManager
 				Map.Entry pair = (Map.Entry)it.next();
 				if(pair.getValue().equals(" "))
 				System.out.println(pair.getKey() + " = " + pair.getValue());
-				it.remove(); // avoids a ConcurrentModificationException
+				it.remove();
 				//TODO
 			}
 		}

@@ -5,7 +5,9 @@ import MiddlewareServer.LockManager.LockManager;
 
 import java.io.*;
 import java.rmi.RemoteException;
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class TransactionManager {
     private int xid;
@@ -23,7 +25,9 @@ public class TransactionManager {
     private boolean rmR = true;
     private boolean rmF = true;
     private boolean rmCus = true;
-    private boolean alive;
+    private boolean alive = true;
+    private List<Integer> transactionStatusList = new ArrayList<>();
+    private int timeoutInSec = 5;
 
     public TransactionManager(){
         xid = 1;
@@ -138,6 +142,8 @@ public class TransactionManager {
                 System.out.println("Can't write to " + masterName);
             }
         }
+
+        transactionStatusList.add(transactionId);
         write2log(transactionId + " C");
 
         if(transaction.commit()){
@@ -149,7 +155,9 @@ public class TransactionManager {
         return false;
     }
 
-    public boolean transactionInvoke(int transactionId) throws InvalidTransactionException, TranscationAbortedException{
+    public boolean transactionInvoke(int transactionId) throws InvalidTransactionException, TranscationAbortedException, RMNotAliveException{
+        if(!alive)
+            throw new RMNotAliveException();
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(transactionId, "no such transaction");
@@ -223,12 +231,11 @@ public class TransactionManager {
 
     // return true if all particpate vote yes.
     private boolean prepareCommit(int xid){
-        //TODO: add timeout mechainsim
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
         try {
             for (Transaction.RM rm : rmList) {
                 if (rm == Transaction.RM.RM_CUS) {
-                    if(!middleware.prepareCommit("costumers", xid)){
+                    if(!timeoutPrepareCommit(xid, "customers")){
                         // Remove RM since it has discard this transaction.
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::customer server votes no for <" + xid + "> commit");
@@ -236,21 +243,21 @@ public class TransactionManager {
                     }
                 }
                 if (rm == Transaction.RM.RM_C) {
-                    if(!middleware.prepareCommit("cars", xid)){
+                    if(!timeoutPrepareCommit(xid, "cars")){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::cars server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_R) {
-                    if(!middleware.prepareCommit("rooms", xid)){
+                    if(!timeoutPrepareCommit(xid, "rooms")){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::rooms server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_F) {
-                    if(!middleware.prepareCommit("flights", xid)){
+                    if(!timeoutPrepareCommit(xid, "flights")){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::flights server votes no for <" + xid + "> commit");
                         return false;
@@ -258,13 +265,37 @@ public class TransactionManager {
                 }
             }
         }
-        catch (RemoteException e){
+        catch (Exception e){
             System.out.println("TM::remote exception for prepareCommit <" + xid + ">");
         }
         System.out.println("TM::all participant RM vote yes for <" + xid + ">");
         return true;
     }
 
+    private boolean timeoutPrepareCommit(int xid, String rm){
+        final Duration timeout = Duration.ofSeconds(timeoutInSec);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        final Future<Boolean> handler = executor.submit(new Callable() {
+            public Boolean call() throws Exception {
+                    return middleware.prepareCommit(rm, xid);
+            }
+        });
+
+        try {
+            return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            handler.cancel(true);
+            alive = false;
+            return false;
+            // TODO: timeout handler
+        }
+        catch (Exception e){
+            System.out.println("Concurrent Exception");
+        }
+        executor.shutdownNow();
+        return false;
+    }
 
     private boolean sendResult(int xid, boolean result){
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
