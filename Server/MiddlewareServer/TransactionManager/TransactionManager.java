@@ -3,9 +3,7 @@ package MiddlewareServer.TransactionManager;
 import MiddlewareServer.Common.ResourceManager;
 import MiddlewareServer.LockManager.LockManager;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.rmi.RemoteException;
 import java.util.*;
 
@@ -15,7 +13,12 @@ public class TransactionManager {
     private ResourceManager middleware;
     private LockManager lm;
     private String logFileName = "./middlewareLog";
+    private String fileAName = "./mwA";
+    private String fileBName = "./mwB";
+    private String masterName = "./mwMaster";
+    private FileWriter masterWriter;
     private FileWriter logWriter;
+    private boolean masterIsA;
     private boolean rmC = true;
     private boolean rmR = true;
     private boolean rmF = true;
@@ -33,13 +36,27 @@ public class TransactionManager {
         this.lm = lm;
 
 
-        File logFile = new File(logFileName);
+        File masterRecord = new File(masterName);
 
         // create file in disk
-        if(!logFile.exists()) {
+        if(!masterRecord.exists()) {
+            File fileA = new File(fileAName);
+            File fileB = new File(fileBName);
+            File logFile = new File(logFileName);
             try {
+                masterRecord.createNewFile();
+                fileA.delete();
+                fileB.delete();
+                logFile.delete();
+                fileA.createNewFile();
+                fileB.createNewFile();
                 logFile.createNewFile();
+                masterWriter = new FileWriter(masterRecord, false);
+                masterWriter.write("0" + fileAName);
                 logWriter = new FileWriter(logFileName);
+                store(fileAName);
+                store(fileBName);
+                masterIsA = true;
                 logWriter.flush();
             } catch (IOException e) {
                 System.out.println("Can't create file in disk for " + logFileName);
@@ -147,6 +164,7 @@ public class TransactionManager {
     private void write2log(String msg){
         try {
             logWriter.write(msg + "\n");
+            logWriter.flush();
         }
         catch (IOException e){
             System.out.println("Can't write to log");
@@ -242,5 +260,38 @@ public class TransactionManager {
         if(rmC && rmF && rmR && rmCus)
             return true;
         return false;
+    }
+
+    public boolean save(String name){
+        try {
+            File outFile = new File(name);
+            outFile.delete();
+            outFile.createNewFile();
+            FileOutputStream fileOut = new FileOutputStream(name);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(transactionList);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in " + name + " .\n");
+        }catch(IOException i) {
+            i.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    public boolean store(String name){
+        File file = new File(name);
+        try {
+            FileOutputStream fileOut = new FileOutputStream(name, false);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(transactionList);
+            out.close();
+            fileOut.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

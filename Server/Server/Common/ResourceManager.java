@@ -701,6 +701,7 @@ public class ResourceManager implements IResourceManager
 	private void write2log(String msg){
 		try {
 			logWriter.write(msg + "\n");
+			logWriter.flush();
 		}
 		catch (IOException e){
 			System.out.println("Can't write to log");
