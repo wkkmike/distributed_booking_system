@@ -711,6 +711,7 @@ public class ResourceManager implements IResourceManager
 	public boolean prepareCommit(int xid) throws RemoteException{
 		RMHashMap oldm_data = (RMHashMap) m_data.clone();
 		m_data = (RMHashMap) dataHashMap.get(xid).clone();
+		dataHashMap.remove(xid);
 		if(masterIsA){
 			if(!save(fileBName)){
 				write2log(Integer.toString(xid) + " N");

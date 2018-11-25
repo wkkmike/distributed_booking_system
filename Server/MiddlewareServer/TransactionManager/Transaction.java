@@ -9,7 +9,7 @@ import java.io.*;
 import MiddlewareServer.Common.ResourceManager;
 import MiddlewareServer.LockManager.LockManager;
 
-public class Transaction {
+public class Transaction implements Serializable{
 
     private final long TIMEOUT = 30000; // timeout by millisecond
     private int transcationID;
