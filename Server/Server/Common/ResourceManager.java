@@ -772,5 +772,9 @@ public class ResourceManager implements IResourceManager
 		dataHashMap.put(xid, (RMHashMap) m_data.clone());
 		return true;
 	}
+
+	public void removeTransactionFromHashmap(int xid) throws RemoteException{
+		dataHashMap.remove(xid);
+	}
 }
  

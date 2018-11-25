@@ -23,6 +23,7 @@ public class TransactionManager {
     private boolean rmR = true;
     private boolean rmF = true;
     private boolean rmCus = true;
+    private boolean alive;
 
     public TransactionManager(){
         xid = 1;
@@ -77,27 +78,72 @@ public class TransactionManager {
         return (xid - 1);
     }
 
+    public void setAlive(boolean a){
+        alive = a;
+    }
+
     public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
             InvalidTransactionException, TransactionCommitFailException{
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
-            throw new InvalidTransactionException(xid, "no such transaction");
+            throw new InvalidTransactionException(transactionId, "no such transaction");
+
+        // Write start 2PC
         write2log(Integer.toString(transactionId) + " S");
 
-        if(prepareCommit(xid)) {
+        // Send vote request to all participant
+        if(prepareCommit(transactionId)) {
+
+            // receive all decision, than commit.
+            if(masterIsA){
+                if(!save(fileBName)){
+                    // can't save to file, coordinator vote no, then abort this transaction
+                    write2log(Integer.toString(xid) + " A");
+                    sendResult(transactionId, false);
+                    return false;
+                }
+            }
+            else{
+                if(!save(fileAName)){
+                    write2log(Integer.toString(xid) + " A");
+                    sendResult(transactionId, false);
+                    return true;
+                }
+            }
+        }
+        // some participant vote no, abort the transaction
+        else {
+            // abort the transaction.
+            transactionList.remove(transactionId);
             write2log(Integer.toString(transactionId) + " A");
-            sendResult(xid, true);
-            //TODO: Send yes to every.
+            sendResult(transactionId, false);
+            return false;
+        }
+
+        // All participant vote yes, commit the transaction
+        if(masterIsA) {
+            masterIsA = false;
+            try {
+                masterWriter.write(transactionId + " B");
+            }
+            catch (IOException e){
+                System.out.println("Can't write to " + masterName);
+            }
         }
         else {
-            write2log(Integer.toString(transactionId) + " N");
-            sendResult(xid, false);
-            return false;
-            // TODO: Send no to every
+            masterIsA = true;
+            try {
+                masterWriter.write(transactionId + " A");
+            } catch (IOException e) {
+                System.out.println("Can't write to " + masterName);
+            }
         }
+        write2log(transactionId + " C");
+
         if(transaction.commit()){
             transactionList.remove(transactionId);
-            write2log(transactionId + " C");
+            // send result to all participant.
+            sendResult(transactionId, true);
             return true;
         }
         return false;
@@ -125,7 +171,7 @@ public class TransactionManager {
             InvalidTransactionException {
         Transaction transaction = transactionList.get(transactionId);
         if (transaction == null)
-            throw new InvalidTransactionException(xid, "no such transaction");
+            throw new InvalidTransactionException(transactionId, "no such transaction");
         if(transaction.abort()) {
             transactionList.remove(transactionId);
             return true;
@@ -177,6 +223,7 @@ public class TransactionManager {
 
     // return true if all particpate vote yes.
     private boolean prepareCommit(int xid){
+        //TODO: add timeout mechainsim
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
         try {
             for (Transaction.RM rm : rmList) {

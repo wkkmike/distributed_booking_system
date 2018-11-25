@@ -131,12 +131,28 @@ public class RMIResourceManager extends ResourceManager
 			m_resourceManager_cus = connectServer(s_serverHost_Customer, s_serverPort_Customer, s_serverName_Customer);
 		}
 		catch (Exception e) {
+			/*
 			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
 			e.printStackTrace();
 			System.exit(1);
+			*/
 			//TODO: handle remote exception
 		}
 		return true;
+	}
+
+	public void rmFailuerHandler(){
+		try{
+			String[] rmList = {"customer", "cars", "flights", "rooms"};
+			for(String rm : rmList){
+				if (!alive(rm)){
+
+				}
+			}
+		}
+		catch(RemoteException e){
+
+		}
 	}
 
 	public boolean shutdown() throws RemoteException{
