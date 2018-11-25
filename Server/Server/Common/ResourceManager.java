@@ -7,6 +7,7 @@ package Server.Common;
 
 import Server.Interface.*;
 
+import java.io.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
@@ -14,10 +15,54 @@ public class ResourceManager implements IResourceManager
 {
 	protected String m_name = "";
 	protected RMHashMap m_data = new RMHashMap();
+	protected String fileAName;
+	protected String fileBName;
+	protected String logFileName;
+	protected String masterRecordName;
+	protected Boolean masterIsA;
+	protected FileWriter masterWriter;
+	protected FileWriter logWriter;
 
 	public ResourceManager(String p_name)
 	{
 		m_name = p_name;
+		masterRecordName = "./" + p_name + "master";
+		fileAName = "./" + p_name + "A";
+		fileBName = "./" + p_name + "B";
+		logFileName = "./" + p_name + "log";
+
+		File masterRecord = new File(masterRecordName);
+		// create file in disk
+		if(!masterRecord.exists()){
+			File fileA = new File(fileAName);
+			File fileB = new File(fileBName);
+			File logFile = new File(logFileName);
+			try{
+				masterRecord.createNewFile();
+				fileA.delete();
+				fileB.delete();
+				logFile.delete();
+				fileA.createNewFile();
+				fileB.createNewFile();
+				logFile.createNewFile();
+				masterWriter = new FileWriter(masterRecordName, false);
+				masterWriter.write("0 " + fileAName);
+				logWriter = new FileWriter(logFileName);
+				store(fileAName);
+				store(fileBName);
+				masterIsA = true;
+				masterWriter.flush();
+				//masterWriter.close();
+			}
+			catch(IOException e){
+				System.out.println("Can't create file in disk for " + p_name);
+			}
+		}
+
+		// Recover process
+		else{
+			recover();
+		}
 	}
 
 	// Reads a data item
@@ -569,6 +614,148 @@ public class ResourceManager implements IResourceManager
 	public String getName() throws RemoteException
 	{
 		return m_name;
+	}
+
+	public boolean store(String name){
+		File file = new File(name);
+		try {
+			FileOutputStream fileOut = new FileOutputStream(name, false);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(m_data);
+			out.close();
+			fileOut.close();
+			Trace.info("RM::store database at: " + name);
+		}
+		catch (IOException e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean save(String name){
+		try {
+			File outFile = new File(name);
+			outFile.delete();
+			outFile.createNewFile();
+			FileOutputStream fileOut = new FileOutputStream(name);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(m_data);
+			out.close();
+			fileOut.close();
+			System.out.printf("Serialized data is saved in " + name + " .\n");
+		}catch(IOException i) {
+			i.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean load(String name){
+		try {
+			FileInputStream fileIn = new FileInputStream(name);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			m_data = (RMHashMap) in.readObject();
+			in.close();
+			fileIn.close();
+			System.out.printf("Serialized data is load from " + name + " .\n");
+		}catch(IOException | ClassNotFoundException i) {
+			i.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	public boolean alive() throws RemoteException{
+		return true;
+	}
+
+	private void recover() {
+		try {
+			BufferedReader logReader = new BufferedReader(new FileReader(logFileName));
+			String line = logReader.readLine();
+			HashMap<String, String> logHashMap = new HashMap<>();
+			while(line != null){
+				String[] log = line.split(" ");
+				logHashMap.put(log[0], log[1]);
+				line = logReader.readLine();
+			}
+			Iterator it = logHashMap.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry pair = (Map.Entry)it.next();
+				if(pair.getValue().equals(" "))
+				System.out.println(pair.getKey() + " = " + pair.getValue());
+				it.remove(); // avoids a ConcurrentModificationException
+				//TODO
+			}
+		}
+		catch(IOException e){
+
+		}
+	}
+
+	private void write2log(String msg){
+		try {
+			logWriter.write(msg + "\n");
+		}
+		catch (IOException e){
+			System.out.println("Can't write to log");
+		}
+	}
+
+
+	public boolean prepareCommit(int xid) throws RemoteException{
+		if(masterIsA){
+			if(!save(fileBName)){
+				write2log(Integer.toString(xid) + " N");
+				return false;
+			}
+		}
+		else{
+			if(!save(fileAName)){
+				write2log(Integer.toString(xid) + " A");
+				return true;
+			}
+		}
+		write2log(Integer.toString(xid) + " Y");
+		return true;
+	}
+
+	public boolean receiveResult(int xid, boolean result) throws RemoteException{
+
+		if(result){
+			if(masterIsA) {
+				masterIsA = false;
+				try {
+					masterWriter.write(Integer.toString(xid) + " B");
+				}
+				catch (IOException e){
+					System.out.println("Can't write to " + masterRecordName);
+					receiveResult(xid, result);
+				}
+			}
+			else {
+				masterIsA = true;
+				try {
+					masterWriter.write(Integer.toString(xid) + " A");
+				} catch (IOException e) {
+					System.out.println("Can't write to " + masterRecordName);
+					receiveResult(xid, result);
+				}
+			}
+			write2log(Integer.toString(xid) + " C");
+		}
+
+		else{
+			if(masterIsA){
+				load(fileAName);
+			}
+			else{
+				load(fileBName);
+			}
+			write2log(xid + " A");
+		}
+		return true;
 	}
 }
  

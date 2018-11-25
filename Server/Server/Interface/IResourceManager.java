@@ -263,4 +263,10 @@ public interface IResourceManager extends Remote
     public HashMap<String, Integer> getCustomerReservations(int xid, int customerID) throws RemoteException;
 
     public void reduceReservations(int xid, String key, int num) throws RemoteException;
+
+    public boolean alive() throws RemoteException;
+
+    public boolean prepareCommit(int xid) throws RemoteException;
+
+    public boolean receiveResult(int xid, boolean result) throws RemoteException;
 }

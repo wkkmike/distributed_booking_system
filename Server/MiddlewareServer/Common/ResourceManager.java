@@ -16,8 +16,6 @@ import Server.Common.*;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.security.Key;
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
@@ -864,7 +862,8 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException, InvalidTransactionException {
+	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
+			InvalidTransactionException, TransactionCommitFailException {
 		Trace.info("MW:commit(xid:" + transactionId +") called");
 		TM.transactionInvoke(transactionId);
 		if(TM.commit(transactionId)){
@@ -957,6 +956,90 @@ public class ResourceManager implements IMiddleware
 	public void undoAddCustomers(int xid, int customerId)throws RemoteException{
 		Trace.info("MW:undoAddCustomers (xid:" + xid + ", customer:" + customerId +") called");
 		m_resourceManager_cus.deleteCustomer(xid, customerId);
+	}
+
+	protected boolean allAlive() throws RemoteException{
+		boolean flag = true;
+		if(!m_resourceManager_r.alive())
+			flag = false;
+		if(!m_resourceManager_f.alive())
+			flag = false;
+		if(!m_resourceManager_c.alive())
+			flag = false;
+		if(!m_resourceManager_cus.alive())
+			flag = false;
+		return flag;
+	}
+
+	public boolean alive(String rm) throws RemoteException{
+		if(rm.equals("customers")){
+			if(m_resourceManager_cus.alive())
+				return true;
+		}
+		if(rm.equals("cars")){
+			if(m_resourceManager_c.alive())
+				return true;
+		}
+		if(rm.equals("flights")){
+			if(m_resourceManager_f.alive())
+				return true;
+		}
+		if(rm.equals("rooms")){
+			if(m_resourceManager_r.alive())
+				return true;
+		}
+		Trace.info("MW: Resource Manager:" + rm + "is not available.");
+		return false;
+	}
+
+	public boolean prepareCommit(String rm, int xid) throws RemoteException{
+		if(rm.equals("customers")){
+			if(m_resourceManager_cus.prepareCommit(xid))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				return true;
+		}
+		if(rm.equals("cars")){
+			if(m_resourceManager_c.prepareCommit(xid))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				return true;
+		}
+		if(rm.equals("flights")){
+			if(m_resourceManager_f.prepareCommit(xid))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				return true;
+		}
+		if(rm.equals("rooms")){
+			if(m_resourceManager_r.prepareCommit(xid))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+				return true;
+		}
+		Trace.info("MW: Resource Manager:" + rm + "vote no.");
+		return false;
+	}
+
+	public boolean sendResult(int xid, String rm, boolean result) throws RemoteException{
+		if(rm.equals("customers")){
+			if(m_resourceManager_cus.receiveResult(xid, result))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+			return true;
+		}
+		if(rm.equals("cars")){
+			if(m_resourceManager_c.receiveResult(xid, result))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+			return true;
+		}
+		if(rm.equals("flights")){
+			if(m_resourceManager_f.receiveResult(xid, result))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+			return true;
+		}
+		if(rm.equals("rooms")){
+			if(m_resourceManager_r.receiveResult(xid, result))
+				Trace.info("MW: Resource Manager:" + rm + "vote yes.");
+			return true;
+		}
+		Trace.info("MW: Resource Manager:" + rm + "vote no.");
+		return false;
 	}
 }
  

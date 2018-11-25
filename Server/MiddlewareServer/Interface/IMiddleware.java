@@ -2,6 +2,7 @@ package MiddlewareServer.Interface;
 
 import MiddlewareServer.LockManager.DeadlockException;
 import MiddlewareServer.TransactionManager.InvalidTransactionException;
+import MiddlewareServer.TransactionManager.TransactionCommitFailException;
 import MiddlewareServer.TransactionManager.TranscationAbortedException;
 
 import java.rmi.Remote;
@@ -217,7 +218,7 @@ public interface IMiddleware extends Remote
             throws RemoteException;
 
     public boolean commit(int transactionId)
-            throws RemoteException, TranscationAbortedException, InvalidTransactionException;
+            throws RemoteException, TranscationAbortedException, InvalidTransactionException, TransactionCommitFailException;
 
     public void abort(int transactionId)
             throws RemoteException,InvalidTransactionException;

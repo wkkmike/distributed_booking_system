@@ -4,14 +4,14 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.io.*;
 
 import MiddlewareServer.Common.ResourceManager;
-import MiddlewareServer.LockManager.DeadlockException;
 import MiddlewareServer.LockManager.LockManager;
 
 public class Transaction {
 
-    private final long TIMEOUT = 30000;
+    private final long TIMEOUT = 30000; // timeout by millisecond
     private int transcationID;
     List<RM> RMList = new ArrayList<RM>();
     LinkedList<undoOperation> undoOperationsList = new LinkedList<undoOperation>();
@@ -61,6 +61,11 @@ public class Transaction {
         if(aborted)
             throw new TranscationAbortedException(transcationID, "This transaction has been aborted");
         return lm.UnlockAll(transcationID);
+    }
+
+    // commit prepare state
+    private boolean prepare(){
+        return false;
     }
 
     public void transactionSuspend(){
