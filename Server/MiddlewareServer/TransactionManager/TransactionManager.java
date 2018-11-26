@@ -1,6 +1,7 @@
 package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
+import MiddlewareServer.Interface.ITransactionManager;
 import MiddlewareServer.LockManager.LockManager;
 
 import java.io.*;
@@ -28,6 +29,7 @@ public class TransactionManager {
     private boolean alive = true;
     private List<Integer> transactionStatusList = new ArrayList<>();
     private int timeoutInSec = 5;
+    private long timeoutForRetry = 45000;
 
     public TransactionManager(){
         xid = 1;
@@ -175,6 +177,7 @@ public class TransactionManager {
         transaction.transactionSuspend();
     }
 
+
     public boolean abort(int transactionId) throws RemoteException,
             InvalidTransactionException {
         Transaction transaction = transactionList.get(transactionId);
@@ -232,10 +235,11 @@ public class TransactionManager {
     // return true if all particpate vote yes.
     private boolean prepareCommit(int xid){
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
+        long startTime = new Date().getTime();
         try {
             for (Transaction.RM rm : rmList) {
                 if (rm == Transaction.RM.RM_CUS) {
-                    if(!timeoutPrepareCommit(xid, "customers")){
+                    if(!timeoutPrepareCommit(xid, "customers", startTime)){
                         // Remove RM since it has discard this transaction.
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::customer server votes no for <" + xid + "> commit");
@@ -243,21 +247,21 @@ public class TransactionManager {
                     }
                 }
                 if (rm == Transaction.RM.RM_C) {
-                    if(!timeoutPrepareCommit(xid, "cars")){
+                    if(!timeoutPrepareCommit(xid, "cars", startTime)){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::cars server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_R) {
-                    if(!timeoutPrepareCommit(xid, "rooms")){
+                    if(!timeoutPrepareCommit(xid, "rooms", startTime)){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::rooms server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_F) {
-                    if(!timeoutPrepareCommit(xid, "flights")){
+                    if(!timeoutPrepareCommit(xid, "flights", startTime)){
                         transactionList.get(xid).removeRMfromRMList(rm);
                         System.out.println("TM::flights server votes no for <" + xid + "> commit");
                         return false;
@@ -272,10 +276,11 @@ public class TransactionManager {
         return true;
     }
 
-    private boolean timeoutPrepareCommit(int xid, String rm){
+    private boolean timeoutPrepareCommit(int xid, String rm, long startTime)throws RMNotAliveException{
         final Duration timeout = Duration.ofSeconds(timeoutInSec);
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
+        //TODO: RM crash before sending the request.
         final Future<Boolean> handler = executor.submit(new Callable() {
             public Boolean call() throws Exception {
                     return middleware.prepareCommit(rm, xid);
@@ -283,17 +288,24 @@ public class TransactionManager {
         });
 
         try {
-            return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
+                return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        }
+        catch (TimeoutException e) {
             handler.cancel(true);
-            alive = false;
-            return false;
+            long nowTime = new Date().getTime();
+            if(nowTime - startTime > timeoutForRetry){
+                alive = false;
+                throw new RMNotAliveException();
+            }
+            timeoutPrepareCommit(xid, rm, startTime);
             // TODO: timeout handler
         }
-        catch (Exception e){
+        catch (Exception e) {
             System.out.println("Concurrent Exception");
         }
-        executor.shutdownNow();
+        finally {
+            executor.shutdownNow();
+        }
         return false;
     }
 
@@ -371,5 +383,17 @@ public class TransactionManager {
             return false;
         }
         return true;
+    }
+
+    public boolean isAbort(int xid){
+        if(transactionStatusList.contains(xid))
+            return true;
+        return false;
+    }
+
+    public void abortRequest(int xid){
+        transactionList.remove(xid);
+        write2log(xid + " A");
+        return;
     }
 }

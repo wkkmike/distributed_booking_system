@@ -74,7 +74,7 @@ public class ResourceManager implements IMiddleware
 	// Create a new flight, or add seats to existing flight
 	// NOTE: if flightPrice <= 0 and the flight already exists, it maintains its current price
 	public boolean addFlight(int xid, int flightNum, int flightSeats, int flightPrice) throws RemoteException,
-			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException, RMNotAliveException
+			InvalidTransactionException, DeadlockException, TranscationAbortedException, RMNotAliveException
 	{
 		Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") called");
 		try{
@@ -895,6 +895,22 @@ public class ResourceManager implements IMiddleware
 	@Override
 	public boolean shutdown() throws RemoteException{
 		return false;
+	}
+
+	@Override
+	public boolean isAbort(int xid) throws RemoteException {
+		return TM.isAbort(xid);
+	}
+
+	@Override
+	public void abortRequest(int xid) throws RemoteException {
+		String[] rmList = {"customers", "cars", "flights", "rooms"};
+		m_resourceManager_c.removeTransactionFromHashmap(xid);
+		m_resourceManager_cus.removeTransactionFromHashmap(xid);
+		m_resourceManager_f.removeTransactionFromHashmap(xid);
+		m_resourceManager_r.removeTransactionFromHashmap(xid);
+		TM.abortRequest(xid);
+		return;
 	}
 
 	public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{

@@ -6,6 +6,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
+import java.sql.SQLOutput;
 
 public class RMIClient extends Client
 {
@@ -38,16 +39,18 @@ public class RMIClient extends Client
 		}
 
 		// Get a reference to the RMIRegister
-		try {
-			RMIClient client = new RMIClient();
-			client.connectServer();
-			client.start();
-		} 
-		catch (Exception e) {    
-			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
-			e.printStackTrace();
-			System.exit(1);
-			// TODO: Handle remote exception
+		while(true) {
+			try {
+				RMIClient client = new RMIClient();
+				client.connectServer();
+				client.start();
+			} catch (RemoteException e) {
+				System.out.println("Middleware can not connect now.");
+			} catch (Exception e) {
+				System.err.println((char) 27 + "[31;1mClient exception: " + (char) 27 + "[0mUncaught exception");
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 	}
 

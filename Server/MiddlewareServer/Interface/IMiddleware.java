@@ -225,4 +225,8 @@ public interface IMiddleware extends Remote
             throws RemoteException,InvalidTransactionException, RMNotAliveException;
 
     public boolean shutdown() throws RemoteException;
+
+    public boolean isAbort(int xid) throws RemoteException;
+
+    public void abortRequest(int xid) throws RemoteException;
 }

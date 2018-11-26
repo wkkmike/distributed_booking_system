@@ -5,9 +5,13 @@
 
 package Server.Common;
 
+import MiddlewareServer.Interface.IMiddleware;
 import Server.Interface.*;
 
 import java.io.*;
+import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 import java.rmi.RemoteException;
 
@@ -23,6 +27,12 @@ public class ResourceManager implements IResourceManager
 	protected FileWriter masterWriter;
 	protected FileWriter logWriter;
 	protected HashMap<Integer, RMHashMap> dataHashMap = new HashMap<>();
+	protected boolean alive = true;
+	protected IMiddleware mw;
+	private static String s_serverHost = "localhost";
+	private static int s_serverPort = 1099;
+	private static String s_serverName = "MiddlewareServer";
+	private static String s_rmiPrefix = "group15";
 
 	public ResourceManager(String p_name)
 	{
@@ -62,7 +72,9 @@ public class ResourceManager implements IResourceManager
 
 		// Recover process
 		else{
+			alive = false;
 			recover();
+			alive = true;
 		}
 	}
 
@@ -671,7 +683,7 @@ public class ResourceManager implements IResourceManager
 	}
 
 	public boolean alive() throws RemoteException{
-		return true;
+		return alive;
 	}
 
 	private void recover() {
@@ -684,11 +696,23 @@ public class ResourceManager implements IResourceManager
 				logHashMap.put(log[0], log[1]);
 				line = logReader.readLine();
 			}
+			connect();
 			Iterator it = logHashMap.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry)it.next();
-				if(pair.getValue().equals(" "))
-				System.out.println(pair.getKey() + " = " + pair.getValue());
+				int xid =  Integer.parseInt((String) pair.getKey());
+				String status = (String) pair.getValue();
+				if(status.equals("S")){
+					mw.abortRequest(xid);
+					write2log(xid + " A");
+				}
+				if(status.equals("C"))
+					continue;
+				if(status.equals("Y")){
+					//TODO: need to ask.
+				}
+				if(status.equals("A"))
+					continue;
 				it.remove();
 				//TODO
 			}
@@ -715,14 +739,14 @@ public class ResourceManager implements IResourceManager
 		dataHashMap.remove(xid);
 		if(masterIsA){
 			if(!save(fileBName)){
-				write2log(Integer.toString(xid) + " N");
+				write2log(Integer.toString(xid) + " A");
 				m_data = (RMHashMap) oldm_data.clone();
 				return false;
 			}
 		}
 		else{
 			if(!save(fileAName)){
-				write2log(Integer.toString(xid) + " N");
+				write2log(Integer.toString(xid) + " A");
 				m_data = (RMHashMap) oldm_data.clone();
 				return true;
 			}
@@ -773,8 +797,47 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
+	// abort because some RM fail, and lost the record of this transaction.
 	public void removeTransactionFromHashmap(int xid) throws RemoteException{
+		if(!dataHashMap.containsKey(xid))
+			return;
 		dataHashMap.remove(xid);
+		write2log(xid + " A");
+		return;
+	}
+
+	public void connect(){
+		// Set the security policy
+		if (System.getSecurityManager() == null)
+		{
+			System.setSecurityManager(new SecurityManager());
+		}
+		try {
+			boolean first = true;
+			while (true) {
+				try {
+					Registry registry = LocateRegistry.getRegistry(s_serverHost, s_serverPort);
+					mw = (IMiddleware)registry.lookup(s_rmiPrefix + s_serverName);
+					System.out.println("Connected to '" + s_serverName + "' server [" + s_serverHost + ":" + s_serverPort + "/"
+							+ s_rmiPrefix + s_serverName + "]");
+					break;
+				}
+				catch (NotBoundException|RemoteException e) {
+					if (first) {
+						e.printStackTrace();
+						System.out.println("Waiting for '" + s_serverName + "' server [" + s_serverHost + ":" + s_serverPort
+								+ "/" + s_rmiPrefix + s_serverName + "]");
+						first = false;
+					}
+				}
+				Thread.sleep(500);
+			}
+		}
+		catch (Exception e) {
+			System.err.println((char)27 + "[31;1mServer exception: " + (char)27 + "[0mUncaught exception");
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 }
  

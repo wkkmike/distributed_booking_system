@@ -22,7 +22,7 @@ public abstract class Client
 
 	public abstract void connectServer();
 
-	public void start()
+	public void start() throws RemoteException
 	{
 		// Prepare for reading commands
 		System.out.println();
@@ -58,9 +58,11 @@ public abstract class Client
 			}
 			catch (IllegalArgumentException|ServerException e) {
 				System.err.println((char)27 + "[31;1mCommand exception: " + (char)27 + "[0m" + e.getLocalizedMessage());
+				throw e;
 			}
 			catch (ConnectException|UnmarshalException e) {
 				System.err.println((char)27 + "[31;1mCommand exception: " + (char)27 + "[0mConnection to server lost");
+				throw e;
 			}
 			catch (Exception e) {
 				System.err.println((char)27 + "[31;1mCommand exception: " + (char)27 + "[0mUncaught exception");
@@ -467,6 +469,9 @@ public abstract class Client
 					System.out.println("Quitting client");
 					System.exit(0);
 			}
+		}
+		catch (RemoteException e){
+			throw e;
 		}
 		catch(Exception e){
 			System.out.println(e.getMessage());
