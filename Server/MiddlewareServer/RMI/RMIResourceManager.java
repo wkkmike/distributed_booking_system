@@ -139,17 +139,6 @@ public class RMIResourceManager extends ResourceManager
 	}
 
 	public void rmFailuerHandler(){
-		try{
-			String[] rmList = {"customer", "cars", "flights", "rooms"};
-			for(String rm : rmList){
-				if (!alive(rm)){
-
-				}
-			}
-		}
-		catch(RemoteException e){
-
-		}
 	}
 
 	public boolean shutdown() throws RemoteException{

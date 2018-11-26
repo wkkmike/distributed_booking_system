@@ -253,7 +253,6 @@ public class LockManager
 						bitset.set(0);
 						return false;
 					}
-					//TODO: Lock conversion, maybe deadlock. need to throw??
 				}
 			} 
 			else if (dataLockObject.getLockType() == TransactionLockObject.LockType.LOCK_READ)

@@ -30,6 +30,22 @@ public class ResourceManager implements IMiddleware
 	public IResourceManager m_resourceManager_r = null;
 	public IResourceManager m_resourceManager_cus = null;
 
+	private static String s_serverHost_Flight = "localhost";
+	private static int s_serverPort_Flight = 1099;
+	private static String s_serverName_Flight = "Flights";
+
+	private static String s_serverHost_Car = "localhost";
+	private static int s_serverPort_Car = 1099;
+	private static String s_serverName_Car = "Cars";
+
+	private static String s_serverHost_Room = "localhost";
+	private static int s_serverPort_Room = 1099;
+	private static String s_serverName_Room = "Rooms";
+
+	private static String s_serverHost_Customer = "localhost";
+	private static int s_serverPort_Customer = 1099;
+	private static String s_serverName_Customer = "Customers";
+
 	//changes start
 	private LockManager LM = new LockManager();
 	private TransactionManager TM = new TransactionManager(this, LM);
@@ -40,6 +56,21 @@ public class ResourceManager implements IMiddleware
 		m_name = p_name;
 	}
 
+	public void reconnect(){
+		System.out.println("MW:: reconnect to RM");
+		try {
+			m_resourceManager_f = connectServer(s_serverHost_Flight, s_serverPort_Flight, s_serverName_Flight);
+			m_resourceManager_c = connectServer(s_serverHost_Car, s_serverPort_Car, s_serverName_Car);
+			m_resourceManager_r = connectServer(s_serverHost_Room, s_serverPort_Room, s_serverName_Room);
+			m_resourceManager_cus = connectServer(s_serverHost_Customer, s_serverPort_Customer, s_serverName_Customer);
+		}
+		catch (Exception e) {
+			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.out.println("MW:: reconnect success");
+	}
 
 	public IResourceManager connectServer(String server, int port, String name)
     {
@@ -97,10 +128,9 @@ public class ResourceManager implements IMiddleware
 		}
 		catch (RemoteException e){
 			TM.setAlive(false);
-
+			reconnect();
 			throw new RMNotAliveException();
 		}
-
 		catch(InvalidTransactionException e){
 			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
 			throw e;
@@ -140,6 +170,11 @@ public class ResourceManager implements IMiddleware
 					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, car));
 				return m_resourceManager_c.addCars(xid, location, count, price);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::addCars(" + xid + ", " + location + ", " + count + ", $" + price + ") is an invalid transaction");
@@ -184,6 +219,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_r.addRooms(xid, location, count, price);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::addRooms(" + xid + ", " + location + ", " + count + ", $" + price + ") is an invalid transaction");
 			throw e;
@@ -221,6 +261,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_f.deleteFlight(xid, flightNum);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::deleteFlight(" + xid + ", " + flightNum + ") is an invalid transaction");
 			throw e;
@@ -256,6 +301,11 @@ public class ResourceManager implements IMiddleware
 					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, car));
 				return m_resourceManager_c.deleteCars(xid, location);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::deleteCars(" + xid + ", " + location + ") is an invalid transaction");
@@ -294,6 +344,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_r.deleteRooms(xid, location);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::deleteRooms(" + xid + ", " + location + ") is an invalid transaction");
 			throw e;
@@ -325,6 +380,11 @@ public class ResourceManager implements IMiddleware
 				TM.addRM(xid, Transaction.RM.RM_F);
 				return m_resourceManager_f.queryFlight(xid, flightNum);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryFlight(" + xid + ", " + flightNum + ") is an invalid transaction");
@@ -358,6 +418,11 @@ public class ResourceManager implements IMiddleware
 				TM.addRM(xid, Transaction.RM.RM_C);
 				return m_resourceManager_c.queryCars(xid, location);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryCars(" + xid + ", " + location  + ") is an invalid transaction");
@@ -393,6 +458,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_r.queryRooms(xid, location);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryRooms(" + xid + ", " + location + ") is an invalid transaction");
 			throw e;
@@ -424,6 +494,11 @@ public class ResourceManager implements IMiddleware
 				TM.addRM(xid, Transaction.RM.RM_F);
 				return m_resourceManager_f.queryFlightPrice(xid, flightNum);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryFlightPrice(" + xid + ", " + flightNum + ") is an invalid transaction");
@@ -458,6 +533,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_c.queryCarsPrice(xid, location);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryCarsPrice(" + xid + ", " + location  + ") is an invalid transaction");
 			throw e;
@@ -490,6 +570,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_r.queryRoomsPrice(xid, location);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryRoomsPrice(" + xid + ", " + location + ") is an invalid transaction");
 			throw e;
@@ -521,6 +606,11 @@ public class ResourceManager implements IMiddleware
 				TM.addRM(xid, Transaction.RM.RM_CUS);
 				return m_resourceManager_cus.queryCustomerInfo(xid, customerID);
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::queryCustomerInfo(" + xid + ", " + customerID + ") is an invalid transaction");
@@ -555,6 +645,11 @@ public class ResourceManager implements IMiddleware
 				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Customer, Integer.toString(customerID)));
 				return customerID;
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ") is an invalid transaction");
@@ -591,6 +686,11 @@ public class ResourceManager implements IMiddleware
 					TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Delete_Customer, Integer.toString(customerID)));
 				return success;
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
@@ -652,6 +752,11 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_cus.deleteCustomer(xid,customerID);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
 			throw e;
@@ -698,6 +803,11 @@ public class ResourceManager implements IMiddleware
 				return true;
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
 			throw e;
@@ -741,6 +851,11 @@ public class ResourceManager implements IMiddleware
 				return true;
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
 			throw e;
@@ -783,6 +898,11 @@ public class ResourceManager implements IMiddleware
 				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Customer, customer));
 				return true;
 			}
+		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 		catch(InvalidTransactionException e){
 			Trace.info("RM::newCustomer(" + xid + ", " + customerID + ") is an invalid transaction");
@@ -871,13 +991,20 @@ public class ResourceManager implements IMiddleware
 	public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
 			InvalidTransactionException, TransactionCommitFailException , RMNotAliveException{
 		Trace.info("MW:commit(xid:" + transactionId +") called");
-		TM.transactionInvoke(transactionId);
-		if(TM.commit(transactionId)){
-			Trace.info("MW:commit(xid:" + transactionId +") success");
-			return true;
+		try {
+			TM.transactionInvoke(transactionId);
+			if (TM.commit(transactionId)) {
+				Trace.info("MW:commit(xid:" + transactionId + ") success");
+				return true;
+			}
+			Trace.info("MW:commit(xid:" + transactionId + ") fail");
+			TM.transactionSuspend(transactionId);
 		}
-		Trace.info("MW:commit(xid:" + transactionId +") fail");
-		TM.transactionSuspend(transactionId);
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
+		}
 		return false;
 	}
 
@@ -889,12 +1016,18 @@ public class ResourceManager implements IMiddleware
 		catch(TranscationAbortedException e){
 			Trace.info("MW:abort(xid:" + transactionId + ") abort a transaction already aborted");
 		}
-		if (TM.abort(transactionId)) {
-			Trace.info("MW:abort(xid:" + transactionId + ") success");
+		try {
+			if (TM.abort(transactionId)) {
+				Trace.info("MW:abort(xid:" + transactionId + ") success");
+			} else {
+				TM.transactionSuspend(transactionId);
+				Trace.info("MW:abort(xid:" + transactionId + ") failed");
+			}
 		}
-		else{
-			TM.transactionSuspend(transactionId);
-			Trace.info("MW:abort(xid:" + transactionId + ") failed");
+		catch (RemoteException e){
+			TM.setAlive(false);
+			reconnect();
+			throw new RMNotAliveException();
 		}
 	}
 
@@ -1043,28 +1176,32 @@ public class ResourceManager implements IMiddleware
 	}
 
 	public boolean sendResult(int xid, String rm, boolean result) throws RemoteException{
-		// TODO: Change log info
+		String info;
+		if(result)
+			info = "commit";
+		else
+			info = "abort";
 		if(rm.equals("customers")){
 			if(m_resourceManager_cus.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("cars")){
 			if(m_resourceManager_c.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("flights")){
 			if(m_resourceManager_f.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("rooms")){
 			if(m_resourceManager_r.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
-		Trace.info("MW: Resource Manager:" + rm + "vote no for transaction <" + xid + ">");
+		Trace.info("MW: Resource Manager:" + rm + "don't answer for result request <" + xid + ">");
 		return false;
 	}
 

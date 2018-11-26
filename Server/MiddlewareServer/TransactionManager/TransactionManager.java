@@ -85,6 +85,7 @@ public class TransactionManager {
     }
 
     public void setAlive(boolean a){
+        System.out.println("TM:: Some RM is not alive now.");
         alive = a;
     }
 
@@ -331,6 +332,33 @@ public class TransactionManager {
         }
         System.out.println("TM::all participant RM vote yes for <" + xid + ">");
         return true;
+    }
+
+    private boolean timeoutSendResult(int xid, String rm, boolean result, long startTime)throws RMNotAliveException{
+        final Duration timeout = Duration.ofSeconds(timeoutInSec);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        //TODO: RM crash before sending the request.
+        final Future<Boolean> handler = executor.submit(new Callable() {
+            public Boolean call() throws Exception {
+                return middleware.sendResult(xid, rm, result);
+            }
+        });
+        while(true) {
+            try {
+                return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                handler.cancel(true);
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    throw new RMNotAliveException();
+                }
+            } catch (Exception e) {
+                System.out.println("Concurrent Exception");
+            } finally {
+                executor.shutdownNow();
+            }
+        }
     }
 
     private boolean timeoutPrepareCommit(int xid, String rm, long startTime)throws RMNotAliveException{
