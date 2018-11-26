@@ -229,6 +229,54 @@ public class TransactionManager {
     }
 
     private boolean recovery(){
+        try {
+            BufferedReader masterReader = new BufferedReader(new FileReader(masterName));
+            String line = masterReader.readLine();
+            String[] masterLine = line.split(" ");
+            String n = masterLine[1];
+            if(n.equals("A")){
+                load(fileAName);
+                masterIsA = true;
+            }
+            else{
+                load(fileBName);
+                masterIsA = false;
+            }
+            BufferedReader logReader = new BufferedReader(new FileReader(logFileName));
+            line = logReader.readLine();
+            HashMap<String, String> logHashMap = new HashMap<>();
+            while(line != null){
+                String[] log = line.split(" ");
+                logHashMap.put(log[0], log[1]);
+                line = logReader.readLine();
+            }
+            Iterator it = logHashMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                int xid =  Integer.parseInt((String) pair.getKey());
+                String status = (String) pair.getValue();
+                if(status.equals("S")){
+                    transactionStatusList.remove(xid);
+                    middleware.abortRequest(xid);
+                    write2log(xid + " A");
+                }
+                if(status.equals("C")) {
+                    sendResult(xid, true);
+                }
+                if(status.equals("I")){
+                    transactionStatusList.remove(xid);
+                    middleware.abortRequest(xid);
+                    write2log(xid + " A");
+                }
+                if(status.equals("A")){
+                    sendResult(xid, false);
+                }
+                it.remove();
+            }
+        }
+        catch(IOException e){
+
+        }
         return true;
     }
 
@@ -369,6 +417,7 @@ public class TransactionManager {
         }
         return true;
     }
+
     public boolean store(String name){
         File file = new File(name);
         try {
@@ -395,5 +444,20 @@ public class TransactionManager {
         transactionList.remove(xid);
         write2log(xid + " A");
         return;
+    }
+
+    public boolean load(String name){
+        try {
+            FileInputStream fileIn = new FileInputStream(name);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            transactionStatusList = (List<Integer>) in.readObject();
+            in.close();
+            fileIn.close();
+            System.out.printf("Serialized data is load from " + name + " .\n");
+        }catch(IOException | ClassNotFoundException i) {
+            i.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

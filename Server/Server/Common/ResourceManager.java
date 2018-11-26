@@ -688,8 +688,20 @@ public class ResourceManager implements IResourceManager
 
 	private void recover() {
 		try {
+			BufferedReader masterReader = new BufferedReader(new FileReader(masterRecordName));
+			String line = masterReader.readLine();
+			String[] masterLine = line.split(" ");
+			String n = masterLine[1];
+			if(n.equals("A")){
+				load(fileAName);
+				masterIsA = true;
+			}
+			else{
+				load(fileBName);
+				masterIsA = false;
+			}
 			BufferedReader logReader = new BufferedReader(new FileReader(logFileName));
-			String line = logReader.readLine();
+			line = logReader.readLine();
 			HashMap<String, String> logHashMap = new HashMap<>();
 			while(line != null){
 				String[] log = line.split(" ");

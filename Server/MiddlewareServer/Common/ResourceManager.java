@@ -904,7 +904,6 @@ public class ResourceManager implements IMiddleware
 
 	@Override
 	public void abortRequest(int xid) throws RemoteException {
-		String[] rmList = {"customers", "cars", "flights", "rooms"};
 		m_resourceManager_c.removeTransactionFromHashmap(xid);
 		m_resourceManager_cus.removeTransactionFromHashmap(xid);
 		m_resourceManager_f.removeTransactionFromHashmap(xid);
