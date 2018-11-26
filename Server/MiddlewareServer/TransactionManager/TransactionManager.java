@@ -159,7 +159,13 @@ public class TransactionManager {
 
     public boolean transactionInvoke(int transactionId) throws InvalidTransactionException, TranscationAbortedException, RMNotAliveException{
         if(!alive)
+        {
+            if(middleware.allAlive()){
+                alive = true;
+                return true;
+            }
             throw new RMNotAliveException();
+        }
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(transactionId, "no such transaction");
@@ -317,6 +323,9 @@ public class TransactionManager {
                 }
             }
         }
+        catch (RMNotAliveException e){
+
+        }
         catch (Exception e){
             System.out.println("TM::remote exception for prepareCommit <" + xid + ">");
         }
@@ -334,27 +343,21 @@ public class TransactionManager {
                     return middleware.prepareCommit(rm, xid);
             }
         });
-
-        try {
+        while(true) {
+            try {
                 return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        }
-        catch (TimeoutException e) {
-            handler.cancel(true);
-            long nowTime = new Date().getTime();
-            if(nowTime - startTime > timeoutForRetry){
-                alive = false;
-                throw new RMNotAliveException();
+            } catch (TimeoutException e) {
+                handler.cancel(true);
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    throw new RMNotAliveException();
+                }
+            } catch (Exception e) {
+                System.out.println("Concurrent Exception");
+            } finally {
+                executor.shutdownNow();
             }
-            timeoutPrepareCommit(xid, rm, startTime);
-            // TODO: timeout handler
         }
-        catch (Exception e) {
-            System.out.println("Concurrent Exception");
-        }
-        finally {
-            executor.shutdownNow();
-        }
-        return false;
     }
 
     private boolean sendResult(int xid, boolean result){
@@ -436,8 +439,8 @@ public class TransactionManager {
 
     public boolean isAbort(int xid){
         if(transactionStatusList.contains(xid))
-            return true;
-        return false;
+            return false;
+        return true;
     }
 
     public void abortRequest(int xid){

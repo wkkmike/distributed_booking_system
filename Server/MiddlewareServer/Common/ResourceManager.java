@@ -95,6 +95,12 @@ public class ResourceManager implements IMiddleware
 				return m_resourceManager_f.addFlight(xid, flightNum, flightSeats, flightPrice);
 			}
 		}
+		catch (RemoteException e){
+			TM.setAlive(false);
+
+			throw new RMNotAliveException();
+		}
+
 		catch(InvalidTransactionException e){
 			Trace.info("RM::addFlight(" + xid + ", " + flightNum + ", " + flightSeats + ", $" + flightPrice + ") is an invalid transaction");
 			throw e;
@@ -898,7 +904,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public boolean isAbort(int xid) throws RemoteException {
+	public boolean isAbort(int xid)  {
 		return TM.isAbort(xid);
 	}
 
@@ -973,37 +979,41 @@ public class ResourceManager implements IMiddleware
 		m_resourceManager_cus.deleteCustomer(xid, customerId);
 	}
 
-	protected boolean allAlive() throws RemoteException{
+	public boolean allAlive() {
 		boolean flag = true;
-		if(!m_resourceManager_r.alive())
+		if(!alive("customers"))
 			flag = false;
-		if(!m_resourceManager_f.alive())
+		if(!alive("cars"))
 			flag = false;
-		if(!m_resourceManager_c.alive())
+		if(!alive("flights"))
 			flag = false;
-		if(!m_resourceManager_cus.alive())
+		if(!alive("rooms"))
 			flag = false;
 		return flag;
 	}
 
-	public boolean alive(String rm) throws RemoteException{
-		if(rm.equals("customers")){
-			if(m_resourceManager_cus.alive())
-				return true;
+	public boolean alive(String rm){
+		try {
+			if (rm.equals("customers")) {
+				if (m_resourceManager_cus.alive())
+					return true;
+			}
+			if (rm.equals("cars")) {
+				if (m_resourceManager_c.alive())
+					return true;
+			}
+			if (rm.equals("flights")) {
+				if (m_resourceManager_f.alive())
+					return true;
+			}
+			if (rm.equals("rooms")) {
+				if (m_resourceManager_r.alive())
+					return true;
+			}
 		}
-		if(rm.equals("cars")){
-			if(m_resourceManager_c.alive())
-				return true;
+		catch (RemoteException e){
+			Trace.info("MW: Resource Manager:" + rm + "is not available.");
 		}
-		if(rm.equals("flights")){
-			if(m_resourceManager_f.alive())
-				return true;
-		}
-		if(rm.equals("rooms")){
-			if(m_resourceManager_r.alive())
-				return true;
-		}
-		Trace.info("MW: Resource Manager:" + rm + "is not available.");
 		return false;
 	}
 

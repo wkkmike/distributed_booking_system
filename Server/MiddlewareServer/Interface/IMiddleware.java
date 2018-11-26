@@ -226,7 +226,7 @@ public interface IMiddleware extends Remote
 
     public boolean shutdown() throws RemoteException;
 
-    public boolean isAbort(int xid) throws RemoteException;
+    public boolean isAbort(int xid) ;
 
     public void abortRequest(int xid) throws RemoteException;
 }

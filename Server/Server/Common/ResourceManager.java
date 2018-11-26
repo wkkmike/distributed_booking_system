@@ -649,14 +649,14 @@ public class ResourceManager implements IResourceManager
 		return true;
 	}
 
-	public boolean save(String name){
+	public boolean save(String name, int xid){
 		try {
 			File outFile = new File(name);
 			outFile.delete();
 			outFile.createNewFile();
 			FileOutputStream fileOut = new FileOutputStream(name);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(m_data);
+			out.writeObject(dataHashMap.get(xid));
 			out.close();
 			fileOut.close();
 			System.out.printf("Serialized data is saved in " + name + " .\n");
@@ -721,17 +721,30 @@ public class ResourceManager implements IResourceManager
 				if(status.equals("C"))
 					continue;
 				if(status.equals("Y")){
-					//TODO: need to ask.
+					boolean result = mw.isAbort(xid);
+					if(result){
+						write2log(xid + " A");
+					}
+					else{
+						if(masterIsA) {
+							load(fileAName);
+						}
+						else {
+							load(fileBName);
+						}
+						write2log(Integer.toString(xid) + " C");
+					}
 				}
 				if(status.equals("A"))
 					continue;
 				it.remove();
-				//TODO
 			}
 		}
 		catch(IOException e){
-
+			System.out.println("RM::Recover process have IO exception, retry.");
+			recover();
 		}
+		System.out.println("RM::Recover finish");
 	}
 
 	private void write2log(String msg){
@@ -746,30 +759,31 @@ public class ResourceManager implements IResourceManager
 
 
 	public boolean prepareCommit(int xid) throws RemoteException{
-		RMHashMap oldm_data = (RMHashMap) m_data.clone();
-		m_data = (RMHashMap) dataHashMap.get(xid).clone();
-		dataHashMap.remove(xid);
 		if(masterIsA){
-			if(!save(fileBName)){
+			if(!save(fileBName, xid)){
+				System.out.println("RM:: Can't save data to disk, abort transaction <" + xid +">");
 				write2log(Integer.toString(xid) + " A");
-				m_data = (RMHashMap) oldm_data.clone();
 				return false;
 			}
 		}
 		else{
-			if(!save(fileAName)){
+			if(!save(fileAName, xid)){
+				System.out.println("RM:: Can't save data to disk, abort the transaction <" + xid +">");
 				write2log(Integer.toString(xid) + " A");
-				m_data = (RMHashMap) oldm_data.clone();
 				return true;
 			}
 		}
+		System.out.println("RM:: Save the data to disk, vote yes for transaction <" + xid + ">");
 		write2log(Integer.toString(xid) + " Y");
 		return true;
 	}
 
 	public boolean receiveResult(int xid, boolean result) throws RemoteException{
-
 		if(result){
+			// copy local data to main memory
+			RMHashMap oldm_data = (RMHashMap) m_data.clone();
+			m_data = (RMHashMap) dataHashMap.get(xid).clone();
+			dataHashMap.remove(xid);
 			if(masterIsA) {
 				masterIsA = false;
 				try {
@@ -789,22 +803,20 @@ public class ResourceManager implements IResourceManager
 					receiveResult(xid, result);
 				}
 			}
+			System.out.println("RM::Receive commit, commit transaction <" + xid + ">");
 			write2log(Integer.toString(xid) + " C");
 		}
 
 		else{
-			if(masterIsA){
-				load(fileAName);
-			}
-			else{
-				load(fileBName);
-			}
+			dataHashMap.remove(xid);
+			System.out.println("RM::Receive abort, abort transaction <" + xid + ">");
 			write2log(xid + " A");
 		}
 		return true;
 	}
 
 	public boolean startTransaction(int xid) throws RemoteException{
+		System.out.println("RM::start transaction <" + xid + ">");
 		dataHashMap.put(xid, (RMHashMap) m_data.clone());
 		return true;
 	}
@@ -814,6 +826,7 @@ public class ResourceManager implements IResourceManager
 		if(!dataHashMap.containsKey(xid))
 			return;
 		dataHashMap.remove(xid);
+		System.out.println("RM:: receive remove transaction request, abort transaction <" + xid + ">");
 		write2log(xid + " A");
 		return;
 	}
