@@ -1000,7 +1000,7 @@ public class ResourceManager implements IMiddleware
 			Trace.info("MW:commit(xid:" + transactionId + ") fail");
 			TM.transactionSuspend(transactionId);
 		}
-		catch (RemoteException e){
+		catch (RemoteException|RMNotAliveException e){
 			TM.setAlive(false);
 			reconnect();
 			throw new RMNotAliveException();

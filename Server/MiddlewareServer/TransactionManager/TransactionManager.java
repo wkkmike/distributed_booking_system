@@ -90,7 +90,7 @@ public class TransactionManager {
     }
 
     public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
-            InvalidTransactionException, TransactionCommitFailException{
+            InvalidTransactionException, TransactionCommitFailException, RMNotAliveException{
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(transactionId, "no such transaction");
@@ -268,7 +268,15 @@ public class TransactionManager {
                     write2log(xid + " A");
                 }
                 if(status.equals("C")) {
-                    sendResult(xid, true);
+                    while(true) {
+                        try {
+                            sendResult(xid, true);
+                            break;
+                        }
+                        catch(RMNotAliveException e){
+                            continue;
+                        }
+                    }
                 }
                 if(status.equals("I")){
                     transactionStatusList.remove(xid);
@@ -276,7 +284,15 @@ public class TransactionManager {
                     write2log(xid + " A");
                 }
                 if(status.equals("A")){
-                    sendResult(xid, false);
+                    while(true) {
+                        try {
+                            sendResult(xid, true);
+                            break;
+                        }
+                        catch(RMNotAliveException e){
+                            continue;
+                        }
+                    }
                 }
                 it.remove();
             }
@@ -378,6 +394,7 @@ public class TransactionManager {
                 handler.cancel(true);
                 long nowTime = new Date().getTime();
                 if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
                     throw new RMNotAliveException();
                 }
             } catch (Exception e) {
@@ -388,39 +405,35 @@ public class TransactionManager {
         }
     }
 
-    private boolean sendResult(int xid, boolean result){
+    private boolean sendResult(int xid, boolean result) throws RMNotAliveException{
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
-        try {
             for (Transaction.RM rm : rmList) {
+                long startTime = new Date().getTime();
                 if (rm == Transaction.RM.RM_CUS) {
-                    if(!middleware.sendResult(xid, "costumers", result)){
+                    if(!timeoutSendResult(xid, "costumers", result, startTime)){
                         System.out.println("TM::customer server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_C) {
-                    if(!middleware.sendResult(xid, "cars", result)){
+                    if(!timeoutSendResult(xid, "cars", result, startTime)){
                         System.out.println("TM::cars server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_R) {
-                    if(!middleware.sendResult(xid, "rooms", result)){
+                    if(!timeoutSendResult(xid, "rooms", result, startTime)){
                         System.out.println("TM::rooms server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_F) {
-                    if(!middleware.sendResult(xid, "flights", result)){
+                    if(!timeoutSendResult(xid, "flights", result, startTime)){
                         System.out.println("TM::flights server votes no for <" + xid + "> commit");
                         return false;
                     }
                 }
             }
-        }
-        catch (RemoteException e){
-            System.out.println("TM::remote exception for sendResult <" + xid + ">");
-        }
         System.out.println("TM::all participant RM receive yes vote for <" + xid + ">");
         return true;
     }
