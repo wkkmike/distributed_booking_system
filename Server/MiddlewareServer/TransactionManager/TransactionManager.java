@@ -239,6 +239,8 @@ public class TransactionManager {
         try {
             BufferedReader masterReader = new BufferedReader(new FileReader(masterName));
             String line = masterReader.readLine();
+            if(line == null)
+                return true;
             String[] masterLine = line.split(" ");
             String n = masterLine[1];
             if(n.equals("A")){

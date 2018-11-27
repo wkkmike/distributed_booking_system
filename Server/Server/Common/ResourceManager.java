@@ -690,6 +690,8 @@ public class ResourceManager implements IResourceManager
 		try {
 			BufferedReader masterReader = new BufferedReader(new FileReader(masterRecordName));
 			String line = masterReader.readLine();
+			if(line == null)
+				return;
 			String[] masterLine = line.split(" ");
 			String n = masterLine[1];
 			if(n.equals("A")){
