@@ -1037,7 +1037,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public boolean isAbort(int xid)  {
+	public boolean isAbort(int xid) throws RemoteException{
 		return TM.isAbort(xid);
 	}
 
