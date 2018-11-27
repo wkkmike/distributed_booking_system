@@ -474,7 +474,7 @@ public abstract class Client
 			throw e;
 		}
 		catch(Exception e){
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
