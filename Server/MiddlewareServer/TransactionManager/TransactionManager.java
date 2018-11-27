@@ -1,7 +1,6 @@
 package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
-import MiddlewareServer.Interface.ITransactionManager;
 import MiddlewareServer.LockManager.LockManager;
 
 import java.io.*;
@@ -396,7 +395,7 @@ public class TransactionManager {
 
         while(true) {
             try {
-                return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 handler.cancel(true);
                 long nowTime = new Date().getTime();
