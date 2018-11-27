@@ -795,6 +795,7 @@ public class ResourceManager implements IResourceManager
 				masterIsA = false;
 				try {
 					masterWriter.write(Integer.toString(xid) + " B");
+					masterWriter.flush();
 				}
 				catch (IOException e){
 					System.out.println("Can't write to " + masterRecordName);
@@ -805,6 +806,7 @@ public class ResourceManager implements IResourceManager
 				masterIsA = true;
 				try {
 					masterWriter.write(Integer.toString(xid) + " A");
+					masterWriter.flush();
 				} catch (IOException e) {
 					System.out.println("Can't write to " + masterRecordName);
 					receiveResult(xid, result);

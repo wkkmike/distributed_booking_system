@@ -1,6 +1,8 @@
 package MiddlewareServer.LockManager;
 
-public class TransactionObject
+import java.io.Serializable;
+
+public class TransactionObject implements Serializable
 {
 	protected int m_xid = 0;
 

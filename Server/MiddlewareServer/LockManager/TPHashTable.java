@@ -1,10 +1,11 @@
 package MiddlewareServer.LockManager;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 /* HashTable class for the Lock Manager */
 
-public class TPHashTable
+public class TPHashTable implements Serializable
 {
 	private static final int HASH_DEPTH = 8;
 

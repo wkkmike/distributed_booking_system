@@ -135,6 +135,7 @@ public class TransactionManager {
             masterIsA = false;
             try {
                 masterWriter.write(transactionId + " B");
+                masterWriter.flush();
             }
             catch (IOException e){
                 System.out.println("Can't write to " + masterName);
@@ -144,6 +145,7 @@ public class TransactionManager {
             masterIsA = true;
             try {
                 masterWriter.write(transactionId + " A");
+                masterWriter.flush();
             } catch (IOException e) {
                 System.out.println("Can't write to " + masterName);
             }
@@ -387,11 +389,12 @@ public class TransactionManager {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
-        final Future<Boolean> handler = executor.submit(new Callable<Boolean>() {
+        Future<Boolean> handler = executor.submit(new Callable<Boolean>() {
             public Boolean call() throws RemoteException {
                     return middleware.prepareCommit(rm, xid);
             }
         });
+
         try {
             return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
