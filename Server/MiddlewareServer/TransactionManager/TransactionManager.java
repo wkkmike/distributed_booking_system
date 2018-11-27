@@ -389,10 +389,11 @@ public class TransactionManager {
 
         //TODO: RM crash before sending the request.
         final Future<Boolean> handler = executor.submit(new Callable() {
-            public Boolean call() throws Exception {
+            public Boolean call() throws RemoteException {
                     return middleware.prepareCommit(rm, xid);
             }
         });
+
         while(true) {
             try {
                 return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -403,7 +404,11 @@ public class TransactionManager {
                     alive = false;
                     throw new RMNotAliveException();
                 }
-            } catch (Exception e) {
+            }
+            catch (ExecutionException e) {
+                System.out.println(e.getCause());
+            }
+            catch (Exception e) {
                 System.out.println("Concurrent Exception");
             } finally {
                 executor.shutdownNow();
