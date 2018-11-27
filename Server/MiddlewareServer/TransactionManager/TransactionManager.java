@@ -44,7 +44,13 @@ public class TransactionManager {
 
 
         File masterRecord = new File(masterName);
-
+        try {
+            masterWriter = new FileWriter(masterRecord, false);
+            logWriter = new FileWriter(logFileName);
+        }
+        catch (IOException e){
+            System.out.println("Can't create file writer");
+        }
         // create file in disk
         if(!masterRecord.exists()) {
             File fileA = new File(fileAName);
@@ -58,9 +64,7 @@ public class TransactionManager {
                 fileA.createNewFile();
                 fileB.createNewFile();
                 logFile.createNewFile();
-                masterWriter = new FileWriter(masterRecord, false);
                 masterWriter.write("0" + fileAName);
-                logWriter = new FileWriter(logFileName);
                 store(fileAName);
                 store(fileBName);
                 masterIsA = true;

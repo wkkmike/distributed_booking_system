@@ -48,6 +48,13 @@ public class ResourceManager implements IResourceManager
 			File fileA = new File(fileAName);
 			File fileB = new File(fileBName);
 			File logFile = new File(logFileName);
+			try {
+				masterWriter = new FileWriter(masterRecord, false);
+				logWriter = new FileWriter(logFileName);
+			}
+			catch (IOException e){
+				System.out.println("Can't create file writer");
+			}
 			try{
 				masterRecord.createNewFile();
 				fileA.delete();
@@ -56,9 +63,7 @@ public class ResourceManager implements IResourceManager
 				fileA.createNewFile();
 				fileB.createNewFile();
 				logFile.createNewFile();
-				masterWriter = new FileWriter(masterRecordName, false);
 				masterWriter.write("0 " + fileAName);
-				logWriter = new FileWriter(logFileName);
 				store(fileAName);
 				store(fileBName);
 				masterIsA = true;
