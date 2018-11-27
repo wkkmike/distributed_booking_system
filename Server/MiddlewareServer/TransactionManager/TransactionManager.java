@@ -392,28 +392,27 @@ public class TransactionManager {
                     return middleware.prepareCommit(rm, xid);
             }
         });
-
-        while(true) {
-            try {
-                handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                handler.cancel(true);
-                long nowTime = new Date().getTime();
-                if (nowTime - startTime > timeoutForRetry) {
-                    alive = false;
-                    throw new RMNotAliveException();
-                }
+        try {
+            return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            handler.cancel(true);
+            long nowTime = new Date().getTime();
+            if (nowTime - startTime > timeoutForRetry) {
+                alive = false;
+                throw new RMNotAliveException();
             }
-            catch (ExecutionException e) {
-                e.printStackTrace();
-                System.out.println(e.getCause());
-            }
-            catch (Exception e) {
-                System.out.println("Concurrent Exception");
-            } finally {
-                executor.shutdownNow();
-            }
+            return timeoutPrepareCommit(xid, rm, startTime);
         }
+        catch (ExecutionException e) {
+            e.printStackTrace();
+            System.out.println(e.getCause());
+        }
+        catch (Exception e) {
+            System.out.println("Concurrent Exception");
+        } finally {
+            executor.shutdownNow();
+        }
+        return false;
     }
 
     private boolean sendResult(int xid, boolean result) throws RMNotAliveException{
