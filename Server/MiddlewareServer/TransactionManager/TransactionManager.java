@@ -406,6 +406,7 @@ public class TransactionManager {
                 }
             }
             catch (ExecutionException e) {
+                e.printStackTrace();
                 System.out.println(e.getCause());
             }
             catch (Exception e) {
