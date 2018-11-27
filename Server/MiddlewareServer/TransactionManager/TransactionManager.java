@@ -387,7 +387,7 @@ public class TransactionManager {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
-        final Future<Boolean> handler = executor.submit(new Callable() {
+        final Future<Boolean> handler = executor.submit(new Callable<Boolean>() {
             public Boolean call() throws RemoteException {
                     return middleware.prepareCommit(rm, xid);
             }
