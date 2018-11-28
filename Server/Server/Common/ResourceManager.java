@@ -833,6 +833,7 @@ public class ResourceManager implements IResourceManager
 
 	public boolean startTransaction(int xid) throws RemoteException{
 		System.out.println("RM::start transaction <" + xid + ">");
+		write2log(xid + " S");
 		dataHashMap.put(xid, (RMHashMap) m_data.clone());
 		return true;
 	}
