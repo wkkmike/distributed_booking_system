@@ -41,10 +41,8 @@ public class TransactionManager {
 
 
         File masterRecord = new File(masterName);
-        System.out.println("1");
         // create file in disk
         if(!masterRecord.exists()) {
-            System.out.println("2");
             File fileA = new File(fileAName);
             File fileB = new File(fileBName);
             File logFile = new File(logFileName);
@@ -58,7 +56,7 @@ public class TransactionManager {
                 fileA.createNewFile();
                 fileB.createNewFile();
                 logFile.createNewFile();
-                masterWriter.write("0" + fileAName);
+                masterWriter.write("0 A");
                 store(fileAName);
                 store(fileBName);
                 masterIsA = true;
@@ -70,7 +68,6 @@ public class TransactionManager {
             }
         }
         else{
-            System.out.println("3");
             recovery();
         }
     }

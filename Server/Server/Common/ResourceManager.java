@@ -57,7 +57,7 @@ public class ResourceManager implements IResourceManager
 				fileA.createNewFile();
 				fileB.createNewFile();
 				logFile.createNewFile();
-				masterWriter.write("0 " + fileAName);
+				masterWriter.write("0 A");
 				store(fileAName);
 				store(fileBName);
 				masterIsA = true;
