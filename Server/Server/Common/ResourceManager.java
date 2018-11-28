@@ -753,7 +753,7 @@ public class ResourceManager implements IResourceManager
 
 	private void write2log(String msg){
 		try {
-			FileWriter logWriter = new FileWriter(logFileName);
+			FileWriter logWriter = new FileWriter(logFileName, true);
 			logWriter.write(msg + "\n");
 			logWriter.flush();
 			logWriter.close();
