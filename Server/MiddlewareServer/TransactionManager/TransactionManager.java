@@ -423,6 +423,7 @@ public class TransactionManager {
     }
 
     private boolean sendResult(int xid, boolean result) throws RMNotAliveException{
+        Transaction t = transactionList.get(xid);
         List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
             for (Transaction.RM rm : rmList) {
                 long startTime = new Date().getTime();
