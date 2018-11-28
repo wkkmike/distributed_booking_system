@@ -756,12 +756,16 @@ public class ResourceManager implements IResourceManager
 
 	private void write2log(String msg){
 		try {
+			System.out.println("1");
 			logWriter.write(msg + "\n");
+			System.out.println("2");
 			logWriter.flush();
+			System.out.println("3");
 		}
 		catch (IOException e){
 			System.out.println("Can't write to log");
 		}
+		System.out.println("4");
 		return;
 	}
 
@@ -782,7 +786,9 @@ public class ResourceManager implements IResourceManager
 			}
 		}
 		System.out.println("RM:: Save the data to disk, vote yes for transaction <" + xid + ">");
+		System.out.println("0");
 		write2log(Integer.toString(xid) + " Y");
+		System.out.println("5");
 		return true;
 	}
 
