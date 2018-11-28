@@ -520,6 +520,9 @@ public class TransactionManager {
     }
 
     public void abortRequest(int xid){
+        if(!transactionList.containsKey(xid))
+            return;
+        transactionList.get(xid).unlockAll();
         transactionList.remove(xid);
         write2log(xid + " A");
         return;

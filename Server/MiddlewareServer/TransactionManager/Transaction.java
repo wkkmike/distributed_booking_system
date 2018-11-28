@@ -116,6 +116,11 @@ public class Transaction implements Serializable{
         return returnList;
     }
 
+    public void unlockAll(){
+        lm.UnlockAll(transcationID);
+        return;
+    }
+
     public synchronized boolean abort(){
         scheduler.shutdownNow();
         if(aborted){
