@@ -765,6 +765,8 @@ public class ResourceManager implements IResourceManager
 
 
 	public boolean prepareCommit(int xid) throws RemoteException{
+		if(!dataHashMap.containsKey(xid))
+			return true;
 		if(masterIsA){
 			if(!save(fileBName, xid)){
 				System.out.println("RM:: Can't save data to disk, abort transaction <" + xid +">");
@@ -785,6 +787,8 @@ public class ResourceManager implements IResourceManager
 	}
 
 	public boolean receiveResult(int xid, boolean result) throws RemoteException{
+		if(!dataHashMap.containsKey(xid))
+			return true;
 		if(result){
 			// copy local data to main memory
 			RMHashMap oldm_data = (RMHashMap) m_data.clone();

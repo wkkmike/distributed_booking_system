@@ -322,7 +322,16 @@ public class TransactionManager {
 
     // return true if all particpate vote yes.
     private boolean prepareCommit(int xid){
-        List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
+        List<Transaction.RM> rmList = new ArrayList<>(4);
+        if(!transactionList.containsKey(xid)) {
+            rmList.add(Transaction.RM.RM_C);
+            rmList.add(Transaction.RM.RM_CUS);
+            rmList.add(Transaction.RM.RM_F);
+            rmList.add(Transaction.RM.RM_R)
+        }
+        else{
+            rmList = transactionList.get(xid).getRMList();
+        }
         long startTime = new Date().getTime();
         try {
             for (Transaction.RM rm : rmList) {
@@ -423,8 +432,17 @@ public class TransactionManager {
     }
 
     private boolean sendResult(int xid, boolean result) throws RMNotAliveException{
-        Transaction t = transactionList.get(xid);
-        List<Transaction.RM> rmList = transactionList.get(xid).getRMList();
+        List<Transaction.RM> rmList = new ArrayList<>(4);
+        if(!transactionList.containsKey(xid)) {
+            rmList.add(Transaction.RM.RM_C);
+            rmList.add(Transaction.RM.RM_CUS);
+            rmList.add(Transaction.RM.RM_F);
+            rmList.add(Transaction.RM.RM_R)
+        }
+        else{
+            rmList = transactionList.get(xid).getRMList();
+        }
+
             for (Transaction.RM rm : rmList) {
                 long startTime = new Date().getTime();
                 if (rm == Transaction.RM.RM_CUS) {
