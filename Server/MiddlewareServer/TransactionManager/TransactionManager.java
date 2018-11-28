@@ -401,7 +401,8 @@ public class TransactionManager {
                 alive = false;
                 throw new RMNotAliveException();
             }
-            return timeoutPrepareCommit(transactionId, rm, startTime);
+            System.out.println("Timeout");
+            return false;
         }
         catch (ExecutionException e) {
             e.printStackTrace();
