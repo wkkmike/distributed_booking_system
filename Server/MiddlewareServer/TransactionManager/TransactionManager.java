@@ -89,7 +89,7 @@ public class TransactionManager {
     }
 
     public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
-            InvalidTransactionException, TransactionCommitFailException, RMNotAliveException{
+            InvalidTransactionException, RMNotAliveException{
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
             throw new InvalidTransactionException(transactionId, "no such transaction");
@@ -156,10 +156,18 @@ public class TransactionManager {
 
         if(transaction.commit()){
             // send result to all participant.
-            sendResult(transactionId, true);
-            transactionList.remove(transactionId);
+            try {
+                sendResult(transactionId, true);
+            }
+            catch (RMNotAliveException e){
+                throw e;
+            }
+            finally {
+                transactionList.remove(transactionId);
+            }
             return true;
         }
+
         return false;
     }
 
