@@ -1153,24 +1153,28 @@ public class ResourceManager implements IMiddleware, Serializable
 
 	public boolean prepareCommit(String rm, int xid) throws RemoteException{
 		if(rm.equals("customers")){
-			if(m_resourceManager_cus.prepareCommit(xid))
+			if(m_resourceManager_cus.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
+			}
 		}
 		if(rm.equals("cars")){
-			if(m_resourceManager_c.prepareCommit(xid))
+			if(m_resourceManager_c.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
+			}
 		}
 		if(rm.equals("flights")){
-			if(m_resourceManager_f.prepareCommit(xid))
+			if(m_resourceManager_f.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
+			}
 		}
 		if(rm.equals("rooms")){
-			if(m_resourceManager_r.prepareCommit(xid))
+			if(m_resourceManager_r.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
+			}
 		}
 		Trace.info("MW: Resource Manager:" + rm + "vote no for transaction <" + xid + ">");
 		return false;

@@ -391,27 +391,25 @@ public class TransactionManager {
         //TODO: RM crash before sending the request.
         Future<Boolean> handler = executor.submit(() -> middleware.prepareCommit(rm, transactionId));
 
-        try {
-            return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            handler.cancel(true);
-            long nowTime = new Date().getTime();
-            if (nowTime - startTime > timeoutForRetry) {
-                alive = false;
-                throw new RMNotAliveException();
+        while(true) {
+            try {
+                return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                handler.cancel(true);
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
+                    throw new RMNotAliveException();
+                }
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                System.out.println(e.getCause());
+            } catch (Exception e) {
+                System.out.println("Concurrent Exception");
+            }finally {
+                executor.shutdownNow();
             }
-            System.out.println("Timeout");
-            return false;
         }
-        catch (ExecutionException e) {
-            e.printStackTrace();
-            System.out.println(e.getCause());
-        }
-        catch (Exception e) {
-            System.out.println("Concurrent Exception");
-        }
-        executor.shutdownNow();
-        return false;
     }
 
     private boolean sendResult(int xid, boolean result) throws RMNotAliveException{
