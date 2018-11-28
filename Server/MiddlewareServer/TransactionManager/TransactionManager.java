@@ -108,14 +108,14 @@ public class TransactionManager {
             if(masterIsA){
                 if(!save(fileBName)){
                     // can't save to file, coordinator vote no, then abort this transaction
-                    write2log(Integer.toString(xid) + " A");
+                    write2log(Integer.toString(transactionId) + " A");
                     sendResult(transactionId, false);
                     return false;
                 }
             }
             else{
                 if(!save(fileAName)){
-                    write2log(Integer.toString(xid) + " A");
+                    write2log(Integer.toString(transactionId) + " A");
                     sendResult(transactionId, false);
                     return true;
                 }
@@ -357,16 +357,17 @@ public class TransactionManager {
         return true;
     }
 
-    private boolean timeoutSendResult(int xid, String rm, boolean result, long startTime)throws RMNotAliveException{
+    private boolean timeoutSendResult(int transactionId, String rm, boolean result, long startTime)throws RMNotAliveException{
         final Duration timeout = Duration.ofSeconds(timeoutInSec);
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
         final Future<Boolean> handler = executor.submit(new Callable() {
             public Boolean call() throws Exception {
-                return middleware.sendResult(xid, rm, result);
+                return middleware.sendResult(transactionId, rm, result);
             }
         });
+
         while(true) {
             try {
                 return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -384,16 +385,12 @@ public class TransactionManager {
         }
     }
 
-    private boolean timeoutPrepareCommit(int xid, String rm, long startTime)throws RMNotAliveException{
+    private boolean timeoutPrepareCommit(int transactionId, String rm, long startTime)throws RMNotAliveException{
         final Duration timeout = Duration.ofSeconds(timeoutInSec);
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
-        Future<Boolean> handler = executor.submit(new Callable<Boolean>() {
-            public Boolean call() throws RemoteException {
-                    return middleware.prepareCommit(rm, xid);
-            }
-        });
+        Future<Boolean> handler = executor.submit(() -> middleware.prepareCommit(rm, transactionId));
 
         try {
             return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -404,7 +401,7 @@ public class TransactionManager {
                 alive = false;
                 throw new RMNotAliveException();
             }
-            return timeoutPrepareCommit(xid, rm, startTime);
+            return timeoutPrepareCommit(transactionId, rm, startTime);
         }
         catch (ExecutionException e) {
             e.printStackTrace();
@@ -412,9 +409,8 @@ public class TransactionManager {
         }
         catch (Exception e) {
             System.out.println("Concurrent Exception");
-        } finally {
-            executor.shutdownNow();
         }
+        executor.shutdownNow();
         return false;
     }
 
