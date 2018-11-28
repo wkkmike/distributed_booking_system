@@ -1152,7 +1152,6 @@ public class ResourceManager implements IMiddleware, Serializable
 	}
 
 	public boolean prepareCommit(String rm, int xid) throws RemoteException{
-		System.out.println("0 reach");
 		if(rm.equals("customers")){
 			if(m_resourceManager_cus.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
@@ -1166,9 +1165,8 @@ public class ResourceManager implements IMiddleware, Serializable
 			}
 		}
 		if(rm.equals("flights")){
-			System.out.println("1 reach");
+			System.out.println(m_resourceManager_f.prepareCommit(xid));
 			if(m_resourceManager_f.prepareCommit(xid)) {
-				System.out.println("2 reach");
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;
 			}
