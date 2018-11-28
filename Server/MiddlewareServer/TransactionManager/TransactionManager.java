@@ -17,7 +17,7 @@ public class TransactionManager {
     private String logFileName = "./middlewareLog";
     private String fileAName = "./mwA";
     private String fileBName = "./mwB";
-    private String masterName = "./mwMaster";;
+    private String masterName = "./mwMaster";
     private boolean masterIsA;
     private boolean rmC = true;
     private boolean rmR = true;
@@ -41,9 +41,10 @@ public class TransactionManager {
 
 
         File masterRecord = new File(masterName);
-
+        System.out.println("1");
         // create file in disk
         if(!masterRecord.exists()) {
+            System.out.println("2");
             File fileA = new File(fileAName);
             File fileB = new File(fileBName);
             File logFile = new File(logFileName);
@@ -69,6 +70,7 @@ public class TransactionManager {
             }
         }
         else{
+            System.out.println("3");
             recovery();
         }
     }
@@ -327,7 +329,7 @@ public class TransactionManager {
             rmList.add(Transaction.RM.RM_C);
             rmList.add(Transaction.RM.RM_CUS);
             rmList.add(Transaction.RM.RM_F);
-            rmList.add(Transaction.RM.RM_R)
+            rmList.add(Transaction.RM.RM_R);
         }
         else{
             rmList = transactionList.get(xid).getRMList();
@@ -437,7 +439,7 @@ public class TransactionManager {
             rmList.add(Transaction.RM.RM_C);
             rmList.add(Transaction.RM.RM_CUS);
             rmList.add(Transaction.RM.RM_F);
-            rmList.add(Transaction.RM.RM_R)
+            rmList.add(Transaction.RM.RM_R);
         }
         else{
             rmList = transactionList.get(xid).getRMList();
