@@ -14,13 +14,14 @@ import Server.Interface.*;
 import Server.Common.*;
 
 
+import java.io.Serializable;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 
-public class ResourceManager implements IMiddleware
+public class ResourceManager implements IMiddleware, Serializable
 {
 	protected String m_name = "";
     private static String s_rmiPrefix = "group15";
