@@ -24,8 +24,6 @@ public class ResourceManager implements IResourceManager
 	protected String logFileName;
 	protected String masterRecordName;
 	protected Boolean masterIsA;
-	protected FileWriter masterWriter;
-	protected FileWriter logWriter;
 	protected HashMap<Integer, RMHashMap> dataHashMap = new HashMap<>();
 	protected boolean alive = true;
 	protected IMiddleware mw;
@@ -48,14 +46,10 @@ public class ResourceManager implements IResourceManager
 			File fileA = new File(fileAName);
 			File fileB = new File(fileBName);
 			File logFile = new File(logFileName);
-			try {
-				masterWriter = new FileWriter(masterRecord, false);
-				logWriter = new FileWriter(logFileName);
-			}
-			catch (IOException e){
-				System.out.println("Can't create file writer");
-			}
+
 			try{
+				FileWriter masterWriter = new FileWriter(masterRecordName, false);
+				FileWriter logWriter = new FileWriter(logFileName);
 				masterRecord.createNewFile();
 				fileA.delete();
 				fileB.delete();
@@ -68,6 +62,8 @@ public class ResourceManager implements IResourceManager
 				store(fileBName);
 				masterIsA = true;
 				masterWriter.flush();
+				masterWriter.close();
+				logWriter.close();
 				//masterWriter.close();
 			}
 			catch(IOException e){
@@ -756,16 +752,14 @@ public class ResourceManager implements IResourceManager
 
 	private void write2log(String msg){
 		try {
-			System.out.println("1");
+			FileWriter logWriter = new FileWriter(logFileName);
 			logWriter.write(msg + "\n");
-			System.out.println("2");
 			logWriter.flush();
-			System.out.println("3");
+			logWriter.close();
 		}
 		catch (IOException e){
 			System.out.println("Can't write to log");
 		}
-		System.out.println("4");
 		return;
 	}
 
@@ -786,9 +780,7 @@ public class ResourceManager implements IResourceManager
 			}
 		}
 		System.out.println("RM:: Save the data to disk, vote yes for transaction <" + xid + ">");
-		System.out.println("0");
 		write2log(Integer.toString(xid) + " Y");
-		System.out.println("5");
 		return true;
 	}
 
@@ -801,8 +793,10 @@ public class ResourceManager implements IResourceManager
 			if(masterIsA) {
 				masterIsA = false;
 				try {
+					FileWriter masterWriter = new FileWriter(masterRecordName, false);
 					masterWriter.write(Integer.toString(xid) + " B");
 					masterWriter.flush();
+					masterWriter.close();
 				}
 				catch (IOException e){
 					System.out.println("Can't write to " + masterRecordName);
@@ -812,8 +806,10 @@ public class ResourceManager implements IResourceManager
 			else {
 				masterIsA = true;
 				try {
+					FileWriter masterWriter = new FileWriter(masterRecordName, false);
 					masterWriter.write(Integer.toString(xid) + " A");
 					masterWriter.flush();
+					masterWriter.close();
 				} catch (IOException e) {
 					System.out.println("Can't write to " + masterRecordName);
 					receiveResult(xid, result);

@@ -17,9 +17,7 @@ public class TransactionManager {
     private String logFileName = "./middlewareLog";
     private String fileAName = "./mwA";
     private String fileBName = "./mwB";
-    private String masterName = "./mwMaster";
-    private FileWriter masterWriter;
-    private FileWriter logWriter;
+    private String masterName = "./mwMaster";;
     private boolean masterIsA;
     private boolean rmC = true;
     private boolean rmR = true;
@@ -43,19 +41,15 @@ public class TransactionManager {
 
 
         File masterRecord = new File(masterName);
-        try {
-            masterWriter = new FileWriter(masterRecord, false);
-            logWriter = new FileWriter(logFileName);
-        }
-        catch (IOException e){
-            System.out.println("Can't create file writer");
-        }
+
         // create file in disk
         if(!masterRecord.exists()) {
             File fileA = new File(fileAName);
             File fileB = new File(fileBName);
             File logFile = new File(logFileName);
             try {
+                FileWriter masterWriter = new FileWriter(masterRecord, false);
+                FileWriter logWriter = new FileWriter(logFileName);
                 masterRecord.createNewFile();
                 fileA.delete();
                 fileB.delete();
@@ -68,6 +62,8 @@ public class TransactionManager {
                 store(fileBName);
                 masterIsA = true;
                 logWriter.flush();
+                logWriter.close();
+                masterWriter.close();
             } catch (IOException e) {
                 System.out.println("Can't create file in disk for " + logFileName);
             }
@@ -134,8 +130,10 @@ public class TransactionManager {
         if(masterIsA) {
             masterIsA = false;
             try {
+                FileWriter masterWriter = new FileWriter(masterName, false);
                 masterWriter.write(transactionId + " B");
                 masterWriter.flush();
+                masterWriter.close();
             }
             catch (IOException e){
                 System.out.println("Can't write to " + masterName);
@@ -144,8 +142,10 @@ public class TransactionManager {
         else {
             masterIsA = true;
             try {
+                FileWriter masterWriter = new FileWriter(masterName, false);
                 masterWriter.write(transactionId + " A");
                 masterWriter.flush();
+                masterWriter.close();
             } catch (IOException e) {
                 System.out.println("Can't write to " + masterName);
             }
@@ -232,8 +232,10 @@ public class TransactionManager {
 
     private void write2log(String msg){
         try {
+            FileWriter logWriter = new FileWriter(logFileName);
             logWriter.write(msg + "\n");
             logWriter.flush();
+            logWriter.close();
         }
         catch (IOException e){
             System.out.println("Can't write to log");
