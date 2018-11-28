@@ -386,14 +386,13 @@ public class TransactionManager {
     }
 
     private boolean timeoutPrepareCommit(int transactionId, String rm, long startTime)throws RMNotAliveException{
-        final Duration timeout = Duration.ofSeconds(timeoutInSec);
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
         Future<Boolean> handler = executor.submit(() -> middleware.prepareCommit(rm, transactionId));
 
         try {
-            return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             handler.cancel(true);
             long nowTime = new Date().getTime();
