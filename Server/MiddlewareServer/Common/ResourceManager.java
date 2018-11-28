@@ -1165,7 +1165,6 @@ public class ResourceManager implements IMiddleware, Serializable
 			}
 		}
 		if(rm.equals("flights")){
-			System.out.println(m_resourceManager_f.prepareCommit(xid));
 			if(m_resourceManager_f.prepareCommit(xid)) {
 				Trace.info("MW: Resource Manager:" + rm + "vote yes for transaction <" + xid + ">");
 				return true;

@@ -762,6 +762,7 @@ public class ResourceManager implements IResourceManager
 		catch (IOException e){
 			System.out.println("Can't write to log");
 		}
+		return;
 	}
 
 
