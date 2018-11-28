@@ -155,9 +155,9 @@ public class TransactionManager {
         write2log(transactionId + " C");
 
         if(transaction.commit()){
-            transactionList.remove(transactionId);
             // send result to all participant.
             sendResult(transactionId, true);
+            transactionList.remove(transactionId);
             return true;
         }
         return false;
