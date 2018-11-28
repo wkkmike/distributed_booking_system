@@ -21,7 +21,7 @@ import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
 
-public class ResourceManager implements IMiddleware, Serializable
+public class ResourceManager implements IMiddleware
 {
 	protected String m_name = "";
     private static String s_rmiPrefix = "group15";

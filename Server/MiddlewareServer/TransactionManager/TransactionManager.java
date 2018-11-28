@@ -113,7 +113,7 @@ public class TransactionManager {
                 if(!save(fileAName)){
                     write2log(Integer.toString(transactionId) + " A");
                     sendResult(transactionId, false);
-                    return true;
+                    return false;
                 }
             }
         }
@@ -460,7 +460,7 @@ public class TransactionManager {
             outFile.createNewFile();
             FileOutputStream fileOut = new FileOutputStream(name);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(transactionList);
+            out.writeObject(transactionStatusList);
             out.close();
             fileOut.close();
             System.out.printf("Serialized data is saved in " + name + " .\n");

@@ -5,7 +5,7 @@ import java.util.Vector;
 
 /* HashTable class for the Lock Manager */
 
-public class TPHashTable implements Serializable
+public class TPHashTable
 {
 	private static final int HASH_DEPTH = 8;
 
