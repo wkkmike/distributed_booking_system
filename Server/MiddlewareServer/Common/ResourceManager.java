@@ -1149,7 +1149,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public void abortRequest(int xid) {
+	public void abortRequest(int xid){
 		try {
 			m_resourceManager_c.removeTransactionFromHashmap(xid);
 		}
@@ -1332,7 +1332,7 @@ public class ResourceManager implements IMiddleware
 				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
-		Trace.info("MW: Resource Manager:" + rm + "don't answer for result request <" + xid + ">");
+		Trace.info("MW: Resource Manager:" + rm + " don't answer for result request <" + xid + ">");
 		return false;
 	}
 

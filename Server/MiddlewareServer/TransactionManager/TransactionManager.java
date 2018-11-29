@@ -2,6 +2,7 @@ package MiddlewareServer.TransactionManager;
 
 import MiddlewareServer.Common.ResourceManager;
 import MiddlewareServer.LockManager.LockManager;
+import org.omg.CORBA.TIMEOUT;
 
 import java.io.*;
 import java.rmi.RemoteException;
@@ -381,23 +382,20 @@ public class TransactionManager {
     }
 
     private boolean timeoutSendResult(int transactionId, String rm, boolean result, long startTime)throws RMNotAliveException{
-        final Duration timeout = Duration.ofSeconds(timeoutInSec);
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         //TODO: RM crash before sending the request.
-        final Future<Boolean> handler = executor.submit(new Callable() {
-            public Boolean call() throws Exception {
-                return middleware.sendResult(transactionId, rm, result);
-            }
-        });
+        Future<Boolean> handler =  executor.submit(() -> middleware.sendResult(transactionId, rm, result));
+
 
         while(true) {
             try {
-                return handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 handler.cancel(true);
                 long nowTime = new Date().getTime();
                 if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
                     throw new RMNotAliveException();
                 }
             } catch (Exception e) {
@@ -451,25 +449,25 @@ public class TransactionManager {
                 long startTime = new Date().getTime();
                 if (rm == Transaction.RM.RM_CUS) {
                     if(!timeoutSendResult(xid, "costumers", result, startTime)){
-                        System.out.println("TM::customer server votes no for <" + xid + "> commit");
+                        System.out.println("TM::customer server don't answer for <" + xid + "> send result");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_C) {
                     if(!timeoutSendResult(xid, "cars", result, startTime)){
-                        System.out.println("TM::cars server votes no for <" + xid + "> commit");
+                        System.out.println("TM::cars server don't answer for <" + xid + "> send result");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_R) {
                     if(!timeoutSendResult(xid, "rooms", result, startTime)){
-                        System.out.println("TM::rooms server votes no for <" + xid + "> commit");
+                        System.out.println("TM::rooms server don't answer for <" + xid + "> send result");
                         return false;
                     }
                 }
                 if (rm == Transaction.RM.RM_F) {
                     if(!timeoutSendResult(xid, "flights", result, startTime)){
-                        System.out.println("TM::flights server votes no for <" + xid + "> commit");
+                        System.out.println("TM::flights server don't anser for <" + xid + "> send result");
                         return false;
                     }
                 }
