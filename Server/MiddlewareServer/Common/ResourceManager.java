@@ -1150,10 +1150,30 @@ public class ResourceManager implements IMiddleware
 
 	@Override
 	public void abortRequest(int xid) throws RemoteException {
-		m_resourceManager_c.removeTransactionFromHashmap(xid);
-		m_resourceManager_cus.removeTransactionFromHashmap(xid);
-		m_resourceManager_f.removeTransactionFromHashmap(xid);
-		m_resourceManager_r.removeTransactionFromHashmap(xid);
+		try {
+			m_resourceManager_c.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:car server is not alive");
+		}
+		try {
+			m_resourceManager_cus.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:customer server is not alive");
+		}
+		try {
+			m_resourceManager_f.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:flight server is not alive");
+		}
+		try {
+			m_resourceManager_r.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:room server is not alive");
+		}
 		TM.abortRequest(xid);
 		return;
 	}
