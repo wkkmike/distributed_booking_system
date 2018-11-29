@@ -20,6 +20,9 @@ import java.rmi.registry.Registry;
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.NotBoundException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ResourceManager implements IMiddleware
 {
@@ -50,11 +53,22 @@ public class ResourceManager implements IMiddleware
 	//changes start
 	private LockManager LM = new LockManager();
 	private TransactionManager TM = new TransactionManager(this, LM);
+	private ScheduledExecutorService scheduler =
+			Executors.newScheduledThreadPool(1);
+	private final long TIMEOUT = 10000;
 	//changes end
 
 	public ResourceManager(String p_name)
 	{
 		m_name = p_name;
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			public void run() {
+				if(!allAlive()){
+					TM.setAlive(false);
+				}
+				reconnect();
+			}
+		}, TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 	public void reconnect(){
@@ -162,9 +176,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		} finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -214,9 +225,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 
 		return  false;
@@ -269,9 +277,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 
 		return false;
@@ -318,9 +323,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		} finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -366,9 +368,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -415,9 +414,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -460,9 +456,6 @@ public class ResourceManager implements IMiddleware
 		}finally{
 			System.out.println("###################################");
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return -1;
 	}
@@ -505,10 +498,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
-
 		}
 
 		return -1;
@@ -552,9 +541,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return -1;
 	}
@@ -596,9 +582,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 
 		return -1;
@@ -641,9 +624,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return -1;
 	}
@@ -685,9 +665,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return -1;
 	}
@@ -729,9 +706,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return null;
 	}
@@ -775,9 +749,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return -1;
 	}
@@ -823,9 +794,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 
 		return false;
@@ -894,11 +862,7 @@ public class ResourceManager implements IMiddleware
 			}
 			throw de;
 		}finally{
-
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -954,9 +918,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -1009,9 +970,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
@@ -1064,9 +1022,6 @@ public class ResourceManager implements IMiddleware
 			throw de;
 		}finally{
 			TM.transactionSuspend(xid);
-			if(!TM.isAlive()) {
-				reconnect();
-			}
 		}
 		return false;
 	}
