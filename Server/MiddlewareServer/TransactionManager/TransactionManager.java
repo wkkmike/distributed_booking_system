@@ -399,7 +399,7 @@ public class TransactionManager {
                     throw new RMNotAliveException();
                 }
             } catch (Exception e) {
-                System.out.println("Concurrent Exception");
+                System.out.println("Remote Exception, retry.");
             } finally {
                 executor.shutdownNow();
             }
