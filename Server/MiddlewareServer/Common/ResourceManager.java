@@ -1149,7 +1149,7 @@ public class ResourceManager implements IMiddleware
 	}
 
 	@Override
-	public void abortRequest(int xid) throws RemoteException {
+	public void abortRequest(int xid) {
 		try {
 			m_resourceManager_c.removeTransactionFromHashmap(xid);
 		}

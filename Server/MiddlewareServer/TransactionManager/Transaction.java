@@ -193,7 +193,7 @@ public class Transaction implements Serializable{
                 undoOperationsList.addLast(operation);
                 System.out.println("RMI exception:" + e.getMessage());
                 System.out.println("MW:UndoOperation for xid:" + transcationID + " failed");
-                return false;
+                mw.abortRequest(transcationID);
             }
             operation = undoOperationsList.pollLast();
         }
@@ -201,6 +201,7 @@ public class Transaction implements Serializable{
         aborted = true;
         lm.UnlockAll(transcationID);
         System.out.println("MW_Transaction:UnlockAll for xid:" + transcationID + "success");
+        mw.abortRequest(transcationID);
         return true;
     }
 }
