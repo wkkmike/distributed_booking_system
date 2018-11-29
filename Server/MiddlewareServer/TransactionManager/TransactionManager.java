@@ -175,9 +175,10 @@ public class TransactionManager {
         {
             if(middleware.allAlive()){
                 alive = true;
-                return true;
             }
-            throw new RMNotAliveException();
+            else {
+                throw new RMNotAliveException();
+            }
         }
         Transaction transaction = transactionList.get(transactionId);
         if(transaction == null)
