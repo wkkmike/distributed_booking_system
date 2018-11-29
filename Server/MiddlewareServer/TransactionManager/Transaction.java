@@ -72,6 +72,10 @@ public class Transaction implements Serializable{
         scheduler = Executors.newScheduledThreadPool(1);
         scheduler.schedule(new Runnable() {
             public void run() {
+                if(!mw.isAlive()){
+                    transactionSuspend();
+                    return;
+                }
                 System.out.println("MW:: Transaction:<" + transcationID + "> timeout");
                 abort();}
         }, TIMEOUT, TimeUnit.MILLISECONDS);

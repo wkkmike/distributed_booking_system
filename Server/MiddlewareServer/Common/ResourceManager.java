@@ -1336,5 +1336,9 @@ public class ResourceManager implements IMiddleware
 
 		}
 	}
+
+	public boolean isAlive(){
+		return TM.isAlive();
+	}
 }
  
