@@ -448,7 +448,7 @@ public class TransactionManager {
             for (Transaction.RM rm : rmList) {
                 long startTime = new Date().getTime();
                 if (rm == Transaction.RM.RM_CUS) {
-                    if(!timeoutSendResult(xid, "costumers", result, startTime)){
+                    if(!timeoutSendResult(xid, "customers", result, startTime)){
                         System.out.println("TM::customer server don't answer for <" + xid + "> send result");
                         return false;
                     }

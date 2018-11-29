@@ -789,24 +789,17 @@ public class ResourceManager implements IResourceManager
 	}
 
 	public boolean receiveResult(int xid, boolean result) throws RemoteException{
-		System.out.println("1");
 		if(!dataHashMap.containsKey(xid))
 			return true;
-		System.out.println("2");
 		if(result){
 			// copy local data to main memory
 			RMHashMap oldm_data = (RMHashMap) m_data.clone();
 			m_data = (RMHashMap) dataHashMap.get(xid).clone();
-			System.out.println("3");
 			dataHashMap.remove(xid);
-			System.out.println("4");
 			if(masterIsA) {
 				masterIsA = false;
-				System.out.println("7");
 				try {
-					System.out.println("5");
 					FileWriter masterWriter = new FileWriter(masterRecordName, false);
-					System.out.println("6");
 					masterWriter.write(Integer.toString(xid) + " B");
 					masterWriter.flush();
 					masterWriter.close();
