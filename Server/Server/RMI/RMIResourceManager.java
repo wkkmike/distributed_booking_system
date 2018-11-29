@@ -53,7 +53,7 @@ public class RMIResourceManager extends ResourceManager
 					}
 					catch(Exception e) {
 						System.err.println((char)27 + "[31;1mServer exception: " + (char)27 + "[0mUncaught exception");
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 				}
 			});                                       

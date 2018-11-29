@@ -87,6 +87,10 @@ public class TransactionManager {
         alive = a;
     }
 
+    public boolean isAlive(){
+        return alive;
+    }
+
     public boolean commit(int transactionId) throws RemoteException, TranscationAbortedException,
             InvalidTransactionException, RMNotAliveException{
         Transaction transaction = transactionList.get(transactionId);

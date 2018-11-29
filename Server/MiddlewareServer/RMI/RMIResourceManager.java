@@ -157,7 +157,8 @@ public class RMIResourceManager extends ResourceManager
 			// Unregister ourself
 			//registry.unbind(s_rmiPrefix + s_serverName);
 
-			// Unexport; this will also remove us from the RMI runtime
+			// Unexport; this will also remove us from the RMI run
+
 			UnicastRemoteObject.unexportObject(this, true);
 			ScheduledExecutorService scheduler =
 					Executors.newScheduledThreadPool(1);
