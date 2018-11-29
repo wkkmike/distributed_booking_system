@@ -70,6 +70,7 @@ public class ResourceManager implements IMiddleware
 			e.printStackTrace();
 			System.exit(1);
 		}
+		TM.setAlive(true);
 		System.out.println("MW:: reconnect success");
 	}
 
