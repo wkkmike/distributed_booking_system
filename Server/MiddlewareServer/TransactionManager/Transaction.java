@@ -107,6 +107,12 @@ public class Transaction implements Serializable{
         return;
     }
 
+    public boolean hasRm(RM rm){
+        if(RMList.contains(rm))
+            return true;
+        return false;
+    }
+
     public void addUndoOperation(undoOperation operation){
         undoOperationsList.addLast(operation);
     }

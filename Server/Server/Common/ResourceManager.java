@@ -833,6 +833,8 @@ public class ResourceManager implements IResourceManager
 	}
 
 	public boolean startTransaction(int xid) throws RemoteException{
+		if(dataHashMap.containsKey(xid))
+			return true;
 		System.out.println("RM::start transaction <" + xid + ">");
 		write2log(xid + " S");
 		dataHashMap.put(xid, (RMHashMap) m_data.clone());

@@ -70,6 +70,16 @@ public class ResourceManager implements IMiddleware
 			e.printStackTrace();
 			System.exit(1);
 		}
+		for (int id: TM.getTransactionIdList()){
+			if(TM.hasRM(id, Transaction.RM.RM_CUS))
+				startTransaction(id, "customers");
+			if(TM.hasRM(id, Transaction.RM.RM_C))
+				startTransaction(id, "cars");
+			if(TM.hasRM(id, Transaction.RM.RM_R))
+				startTransaction(id, "rooms");
+			if(TM.hasRM(id, Transaction.RM.RM_F))
+				startTransaction(id, "flights");
+		}
 		TM.setAlive(true);
 		System.out.println("MW:: reconnect success");
 	}

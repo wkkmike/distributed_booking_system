@@ -543,4 +543,21 @@ public class TransactionManager {
         }
         return true;
     }
+
+    public List<Integer> getTransactionIdList(){
+        List<Integer> transactionIdList = new LinkedList<>();
+        Iterator it = transactionList.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            transactionIdList.add((Integer) pair.getKey());
+        }
+        return transactionIdList;
+    }
+
+    public boolean hasRM(int transaxtionId, Transaction.RM rm){
+        Transaction transaction = transactionList.get(transaxtionId);
+        if(transaction == null)
+            return false;
+        return transaction.hasRm(rm);
+    }
 }
