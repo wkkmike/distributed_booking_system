@@ -65,8 +65,8 @@ public class ResourceManager implements IMiddleware
 			public void run() {
 				if(!allAlive()){
 					TM.setAlive(false);
+					reconnect();
 				}
-				reconnect();
 			}
 		}, TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
 	}
