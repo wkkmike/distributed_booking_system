@@ -314,7 +314,7 @@ public class TransactionManager {
                 String status = (String) pair.getValue();
                 if(status.equals("S")){
                     transactionStatusList.remove(new Integer(xid));
-                    middleware.abortRequest(xid);
+                    middleware.abortRequestFromTM(xid);
                     write2log(xid + " A");
                 }
                 if(status.equals("C")) {

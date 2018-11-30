@@ -1195,6 +1195,34 @@ public class ResourceManager implements IMiddleware
 		return;
 	}
 
+	public void abortRequestFromTM(int xid){
+		try {
+			m_resourceManager_c.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:car server is not alive");
+		}
+		try {
+			m_resourceManager_cus.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:customer server is not alive");
+		}
+		try {
+			m_resourceManager_f.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:flight server is not alive");
+		}
+		try {
+			m_resourceManager_r.removeTransactionFromHashmap(xid);
+		}
+		catch (RemoteException e){
+			System.out.println("MW:room server is not alive");
+		}
+		return;
+	}
+
 	public ReservableItem getFlight(int xid, int flightNum) throws RemoteException{
 		Trace.info("MW:getFlight (xid:" + xid + ", flightNum:" + flightNum + ") called");
 		return (ReservableItem) m_resourceManager_f.getFlight(xid, flightNum).clone();
