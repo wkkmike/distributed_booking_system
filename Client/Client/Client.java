@@ -449,7 +449,6 @@ public abstract class Client
 				case Abort: {
 					checkArgumentsCount(2, arguments.size());
 					System.out.println("Abort transaction [xid=" + arguments.elementAt(1) + "]");
-
 					int xid = toInt(arguments.elementAt(1));
 					m_resourceManager.abort(xid);
 					System.out.println("Abort xid:" + xid + ", success");
@@ -463,6 +462,28 @@ public abstract class Client
 					System.exit(0);
 					break;
 				}
+				case resetCrashes:{
+					checkArgumentsCount(1, arguments.size());
+					System.out.println("reset crashes");
+					m_resourceManager.resetCrashes();
+					System.out.println("reset crashes success");
+					break;
+				}
+				case crashMiddleware:{
+					checkArgumentsCount(2, arguments.size());
+					System.out.println("crash middleware in mode "+ arguments.elementAt(1));
+					m_resourceManager.crashMiddleware();
+					System.out.println("crash middleware in mode "+ arguments.elementAt(1)+" success");
+					break;
+				}
+				case crashResourceManager:{
+					checkArgumentsCount(3, arguments.size());
+					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2));
+					m_resourceManager.crashResourceManager();
+					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2) + "success");
+					break;
+				}
+
 				case Quit:
 					checkArgumentsCount(1, arguments.size());
 

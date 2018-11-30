@@ -32,7 +32,13 @@ public enum Command {
 	Commit("Commit a transaction", "<xid>"),
 	Abort("Abort a transaction", "<xid>"),
 	Shutdown("Shutdown all servers", ""),
-	Quit("Exit the client application", "");
+	Quit("Exit the client application", ""),
+
+	resetCrashes("disable all crash condition",""),
+	crashMiddleware("transaction manager crash",""),
+	crashResourceManager("resource manager crash","");
+
+
 
 	String m_description;
 	String m_args;
