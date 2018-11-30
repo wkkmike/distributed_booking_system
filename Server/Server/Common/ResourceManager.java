@@ -725,8 +725,11 @@ public class ResourceManager implements IResourceManager
 			while (it.hasNext()) {
 				count++;
 				File crash = new File("./crash");
+				System.out.println("times: " + count);
 				if(count == 2) {
+					System.out.println("enter");
 					if (crash.exists()) {
+						System.out.println("crash");
 						crash.deleteOnExit();
 						System.exit(1);
 					}
