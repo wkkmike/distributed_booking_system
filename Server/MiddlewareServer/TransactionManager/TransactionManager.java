@@ -406,22 +406,9 @@ public class TransactionManager {
     }
 
     private boolean timeoutSendResult(int transactionId, String rm, boolean result, long startTime)throws RMNotAliveException{
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        //TODO: RM crash before sending the request.
-        Future<Boolean> handler =  executor.submit(() -> middleware.sendResult(transactionId, rm, result));
-
-
         while(true) {
             try {
-                return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                handler.cancel(true);
-                long nowTime = new Date().getTime();
-                if (nowTime - startTime > timeoutForRetry) {
-                    alive = false;
-                    throw new RMNotAliveException();
-                }
+                return middleware.sendResult(xid, rm, result);
             } catch (Exception e) {
                 long nowTime = new Date().getTime();
                 if (nowTime - startTime > timeoutForRetry) {
@@ -433,9 +420,7 @@ public class TransactionManager {
                 }catch (Exception ee){
 
                 }
-                System.out.println("Remote Exception, retry.");
-            } finally {
-                executor.shutdownNow();
+                System.out.println("TM:: Retry send result");
             }
         }
     }
