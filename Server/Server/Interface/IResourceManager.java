@@ -273,4 +273,8 @@ public interface IResourceManager extends Remote
     public boolean startTransaction(int xid) throws RemoteException;
 
     public void removeTransactionFromHashmap(int xid) throws RemoteException;
+
+    public void resetCrashes() throws RemoteException;
+
+    public void crashResourceManager(int mode) throws RemoteException;
 }
