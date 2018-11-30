@@ -123,6 +123,7 @@ public class TransactionManager {
         catch(RMNotAliveException e){
             throw e;
         }
+
         if(prepareCommitFlag) {
             if(!flag4)
                 System.exit(1);

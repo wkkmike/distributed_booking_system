@@ -815,7 +815,9 @@ public class ResourceManager implements IResourceManager
 		if(result){
 			// copy local data to main memory
 			RMHashMap oldm_data = (RMHashMap) m_data.clone();
+			System.out.println(queryFlight(xid, 1));
 			m_data = (RMHashMap) dataHashMap.get(xid).clone();
+			System.out.println(queryFlight(xid, 1));
 			dataHashMap.remove(xid);
 			if(!flag4)
 				System.exit(1);
