@@ -71,7 +71,7 @@ public class ResourceManager implements IMiddleware
 		}, TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
-	public void connect(){
+	public boolean connect(){
 		System.out.println("MW:: reconnect to RM");
 		try {
 			m_resourceManager_f = connectServer(s_serverHost_Flight, s_serverPort_Flight, s_serverName_Flight);
@@ -84,7 +84,7 @@ public class ResourceManager implements IMiddleware
 			e.printStackTrace();
 			System.exit(1);
 		}
-		return;
+		return true;
 	}
 
 	public void reconnect(){
