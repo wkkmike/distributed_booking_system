@@ -760,8 +760,10 @@ public class ResourceManager implements IResourceManager
 					continue;
 				it.remove();
 				File crash = new File("./crash");
-				if(crash.exists())
+				if(crash.exists()) {
+					crash.deleteOnExit();
 					System.exit(1);
+				}
 			}
 		}
 		catch(IOException e){
