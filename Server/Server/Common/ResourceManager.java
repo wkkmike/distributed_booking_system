@@ -746,7 +746,7 @@ public class ResourceManager implements IResourceManager
 							masterWriter.close();
 						}
 						else {
-							load(fileBName);
+							load(fileAName);
 							masterIsA = true;
 							FileWriter masterWriter = new FileWriter(masterRecordName, false);
 							masterWriter.write(Integer.toString(xid) + " A");
