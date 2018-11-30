@@ -291,6 +291,8 @@ public class TransactionManager {
                 return true;
             String[] masterLine = line.split(" ");
             String n = masterLine[1];
+            xid = Integer.parseInt(masterLine[0]);
+            xid++;
             if(n.equals("A")){
                 load(fileAName);
                 masterIsA = true;
