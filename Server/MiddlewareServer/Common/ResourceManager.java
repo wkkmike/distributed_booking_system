@@ -71,6 +71,21 @@ public class ResourceManager implements IMiddleware
 		}, TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
+	public void connect(){
+		System.out.println("MW:: reconnect to RM");
+		try {
+			m_resourceManager_f = connectServer(s_serverHost_Flight, s_serverPort_Flight, s_serverName_Flight);
+			m_resourceManager_c = connectServer(s_serverHost_Car, s_serverPort_Car, s_serverName_Car);
+			m_resourceManager_r = connectServer(s_serverHost_Room, s_serverPort_Room, s_serverName_Room);
+			m_resourceManager_cus = connectServer(s_serverHost_Customer, s_serverPort_Customer, s_serverName_Customer);
+		}
+		catch (Exception e) {
+			System.err.println((char)27 + "[31;1mClient exception: " + (char)27 + "[0mUncaught exception");
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
+
 	public void reconnect(){
 		System.out.println("MW:: reconnect to RM");
 		try {
