@@ -774,7 +774,6 @@ public class ResourceManager implements IResourceManager
 			}
 		}
 		catch(IOException e){
-			e.printStackTrace();
 			System.out.println("RM::Recover process have IO exception, retry.");
 			recover();
 		}
