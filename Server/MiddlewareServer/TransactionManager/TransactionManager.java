@@ -112,12 +112,18 @@ public class TransactionManager {
         // Write start 2PC
         write2log(Integer.toString(transactionId) + " S");
 
-        if(!flag1) {
-            System.out.println("RM should exit here");
+        if(!flag1)
             System.exit(1);
-        }
+
         // Send vote request to all participant
-        if(prepareCommit(transactionId)) {
+        boolean prepareCommitFlag = true;
+        try{
+            prepareCommitFlag = prepareCommit(transactionId);
+        }
+        catch(RMNotAliveException e){
+            throw e;
+        }
+        if(prepareCommitFlag) {
             if(!flag4)
                 System.exit(1);
             // receive all decision, than commit.
@@ -183,7 +189,7 @@ public class TransactionManager {
                 sendResult(transactionId, true);
             }
             catch (RMNotAliveException e){
-                throw e;
+
             }
             finally {
                 transactionList.remove(transactionId);
@@ -348,7 +354,7 @@ public class TransactionManager {
     }
 
     // return true if all particpate vote yes.
-    private boolean prepareCommit(int xid){
+    private boolean prepareCommit(int xid) throws RMNotAliveException{
         List<Transaction.RM> rmList = new ArrayList<>(4);
         if(!transactionList.containsKey(xid)) {
             rmList.add(Transaction.RM.RM_C);
@@ -396,7 +402,7 @@ public class TransactionManager {
             }
         }
         catch (RMNotAliveException e){
-
+            throw e;
         }
         catch (Exception e){
             System.out.println("TM::remote exception for prepareCommit <" + xid + ">");
