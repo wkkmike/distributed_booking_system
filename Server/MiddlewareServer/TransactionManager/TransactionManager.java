@@ -440,6 +440,8 @@ public class TransactionManager {
         }
     }
 
+
+    /*
     private boolean timeoutPrepareCommit(int transactionId, String rm, long startTime)throws RMNotAliveException{
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -492,6 +494,35 @@ public class TransactionManager {
                 System.out.println("Concurrent Exception");
             }finally {
                 executor.shutdownNow();
+            }
+        }
+    }
+*/
+
+    private boolean timeoutPrepareCommit(int transactionId, String rm, long startTime)throws RMNotAliveException{
+        while(true) {
+            try {
+                if(!flag2){
+                    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                    scheduler.schedule(new Runnable() {
+                        public void run() {
+                            System.exit(1);
+                        }
+                    }, TIMEOUT, TimeUnit.MILLISECONDS);
+                }
+                return middleware.prepareCommit(rm, transactionId);
+            } catch (Exception e) {
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
+                    throw new RMNotAliveException();
+                }
+                try {
+                    Thread.sleep(5000);
+                }catch (Exception ee){
+
+                }
+                System.out.println("TM:: Retry send perpare commit");
             }
         }
     }
