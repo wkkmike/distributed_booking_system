@@ -96,6 +96,7 @@ public class ResourceManager implements IMiddleware
 		}
 		TM.setAlive(true);
 		System.out.println("MW:: reconnect success");
+		return;
 	}
 
 	public IResourceManager connectServer(String server, int port, String name)

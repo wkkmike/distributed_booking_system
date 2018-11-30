@@ -92,7 +92,10 @@ public class TransactionManager {
     }
 
     public void setAlive(boolean a){
-        System.out.println("TM:: Some RM is not alive now.");
+        if(!a)
+            System.out.println("TM:: Some RM is not alive now.");
+        else
+            System.out.println("TM:: All RM are alive.");
         alive = a;
     }
 
@@ -420,6 +423,11 @@ public class TransactionManager {
                     throw new RMNotAliveException();
                 }
             } catch (Exception e) {
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
+                    throw new RMNotAliveException();
+                }
                 try {
                     Thread.sleep(5000);
                 }catch (Exception ee){
@@ -458,6 +466,11 @@ public class TransactionManager {
                     throw new RMNotAliveException();
                 }
             } catch (ExecutionException e) {
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
+                    throw new RMNotAliveException();
+                }
                 try {
                     Thread.sleep(5000);
                 }catch (Exception ee){
@@ -466,6 +479,16 @@ public class TransactionManager {
 //                e.printStackTrace();
 //                System.out.println(e.getCause());
             } catch (Exception e) {
+                long nowTime = new Date().getTime();
+                if (nowTime - startTime > timeoutForRetry) {
+                    alive = false;
+                    throw new RMNotAliveException();
+                }
+                try {
+                    Thread.sleep(5000);
+                }catch (Exception ee){
+
+                }
                 System.out.println("Concurrent Exception");
             }finally {
                 executor.shutdownNow();
