@@ -47,18 +47,18 @@ public abstract class Client
 
 			try {
 				arguments = parse(command);
-				Command cmd = Command.fromString((String)arguments.elementAt(0));
-				try {
-					execute(cmd, arguments);
-				}
-				catch (ConnectException e) {
-					connectServer();
-					execute(cmd, arguments);
+				if(arguments.size()>0) {
+					Command cmd = Command.fromString((String) arguments.elementAt(0));
+					try {
+						execute(cmd, arguments);
+					} catch (ConnectException e) {
+						connectServer();
+						execute(cmd, arguments);
+					}
 				}
 			}
 			catch (IllegalArgumentException|ServerException e) {
 				System.err.println((char)27 + "[31;1mCommand exception: " + (char)27 + "[0m" + e.getLocalizedMessage());
-				throw e;
 			}
 			catch (ConnectException|UnmarshalException e) {
 				System.err.println((char)27 + "[31;1mCommand exception: " + (char)27 + "[0mConnection to server lost");
@@ -472,14 +472,17 @@ public abstract class Client
 				case crashMiddleware:{
 					checkArgumentsCount(2, arguments.size());
 					System.out.println("crash middleware in mode "+ arguments.elementAt(1));
-					m_resourceManager.crashMiddleware();
-					System.out.println("crash middleware in mode "+ arguments.elementAt(1)+" success");
+					int mode = toInt(arguments.elementAt(1));
+					m_resourceManager.crashMiddleware(mode);
+					System.out.println("crash middleware in mode "+ mode +" success");
 					break;
 				}
 				case crashResourceManager:{
 					checkArgumentsCount(3, arguments.size());
 					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2));
-					m_resourceManager.crashResourceManager();
+					String name = arguments.elementAt(1);
+					int mode = toInt(arguments.elementAt(2));
+					m_resourceManager.crashResourceManager(name,mode);
 					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2) + "success");
 					break;
 				}
