@@ -1315,22 +1315,22 @@ public class ResourceManager implements IMiddleware
 			info = "abort";
 		if(rm.equals("customers")){
 			if(m_resourceManager_cus.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + " receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("cars")){
 			if(m_resourceManager_c.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + " receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("flights")){
 			if(m_resourceManager_f.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + " receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		if(rm.equals("rooms")){
 			if(m_resourceManager_r.receiveResult(xid, result))
-				Trace.info("MW: Resource Manager:" + rm + "receive " + info + " for transaction <" + xid + ">");
+				Trace.info("MW: Resource Manager:" + rm + " receive " + info + " for transaction <" + xid + ">");
 			return true;
 		}
 		Trace.info("MW: Resource Manager:" + rm + " don't answer for result request <" + xid + ">");

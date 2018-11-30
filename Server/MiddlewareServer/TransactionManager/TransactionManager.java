@@ -415,7 +415,7 @@ public class TransactionManager {
     private boolean timeoutSendResult(int transactionId, String rm, boolean result, long startTime)throws RMNotAliveException{
         while(true) {
             try {
-                return middleware.sendResult(xid, rm, result);
+                return middleware.sendResult(transactionId, rm, result);
             } catch (Exception e) {
                 long nowTime = new Date().getTime();
                 if (nowTime - startTime > timeoutForRetry) {
