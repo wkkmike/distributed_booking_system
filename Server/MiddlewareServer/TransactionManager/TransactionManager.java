@@ -181,7 +181,7 @@ public class TransactionManager {
         }
         if(!flag5)
             System.exit(1);
-        transactionStatusList.add(transactionId);
+        transactionStatusList.add(new Integer(transactionId));
         write2log(transactionId + " C");
 
         if(transaction.commit()){
@@ -312,7 +312,7 @@ public class TransactionManager {
                 int xid =  Integer.parseInt((String) pair.getKey());
                 String status = (String) pair.getValue();
                 if(status.equals("S")){
-                    transactionStatusList.remove(xid);
+                    transactionStatusList.remove(new Integer(xid));
                     middleware.abortRequest(xid);
                     write2log(xid + " A");
                 }
@@ -328,7 +328,7 @@ public class TransactionManager {
                     }
                 }
                 if(status.equals("I")){
-                    transactionStatusList.remove(xid);
+                    transactionStatusList.remove(new Integer(xid));
                     middleware.abortRequest(xid);
                     write2log(xid + " A");
                 }
@@ -597,7 +597,7 @@ public class TransactionManager {
     }
 
     public boolean isAbort(int xid){
-        if(transactionStatusList.contains(xid))
+        if(transactionStatusList.contains(new Integer(xid)))
             return false;
         return true;
     }
