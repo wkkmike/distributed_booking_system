@@ -30,9 +30,9 @@ public class ResourceManager implements IResourceManager
 	protected HashMap<Integer, RMHashMap> dataHashMap = new HashMap<>();
 	protected boolean alive = true;
 	protected IMiddleware mw;
-	private static String s_serverHost = "localhost";
-	private static int s_serverPort = 1099;
-	private static String s_serverName = "MiddlewareServer";
+	private static String s_middlewareServerHost = "localhost";
+	private static int s_smiddlewarePort = 1099;
+	private static String s_middlewareServerName = "MiddlewareServer";
 	private static String s_rmiPrefix = "group15";
 	private boolean flag1 = true;
 	private boolean flag2 = true;
@@ -885,17 +885,19 @@ public class ResourceManager implements IResourceManager
 			boolean first = true;
 			while (true) {
 				try {
-					Registry registry = LocateRegistry.getRegistry(s_serverHost, s_serverPort);
-					mw = (IMiddleware)registry.lookup(s_rmiPrefix + s_serverName);
-					System.out.println("Connected to '" + s_serverName + "' server [" + s_serverHost + ":" + s_serverPort + "/"
-							+ s_rmiPrefix + s_serverName + "]");
+					Registry registry = LocateRegistry.getRegistry(s_middlewareServerHost, s_smiddlewarePort);
+					mw = (IMiddleware)registry.lookup(s_rmiPrefix + s_middlewareServerName);
+					System.out.println("Connected to '" + s_middlewareServerName + "' server [" +
+							s_middlewareServerHost + ":" + s_smiddlewarePort + "/"
+							+ s_rmiPrefix + s_middlewareServerName + "]");
 					break;
 				}
 				catch (NotBoundException|RemoteException e) {
 					if (first) {
 						e.printStackTrace();
-						System.out.println("Waiting for '" + s_serverName + "' server [" + s_serverHost + ":" + s_serverPort
-								+ "/" + s_rmiPrefix + s_serverName + "]");
+						System.out.println("Waiting for '" + s_middlewareServerName + "' server [" +
+								s_middlewareServerHost + ":" + s_smiddlewarePort
+								+ "/" + s_rmiPrefix + s_middlewareServerName + "]");
 						first = false;
 					}
 				}
