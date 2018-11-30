@@ -585,7 +585,7 @@ public class TransactionManager {
         try {
             FileOutputStream fileOut = new FileOutputStream(name, false);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(transactionList);
+            out.writeObject(transactionStatusList);
             out.close();
             fileOut.close();
         }
