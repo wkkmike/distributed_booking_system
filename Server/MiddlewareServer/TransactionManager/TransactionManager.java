@@ -109,8 +109,10 @@ public class TransactionManager {
         // Write start 2PC
         write2log(Integer.toString(transactionId) + " S");
 
-        if(!flag1)
+        if(!flag1) {
+            System.out.println("RM should exit here");
             System.exit(1);
+        }
         // Send vote request to all participant
         if(prepareCommit(transactionId)) {
             if(!flag4)
@@ -418,6 +420,11 @@ public class TransactionManager {
                     throw new RMNotAliveException();
                 }
             } catch (Exception e) {
+                try {
+                    Thread.sleep(5000);
+                }catch (Exception ee){
+
+                }
                 System.out.println("Remote Exception, retry.");
             } finally {
                 executor.shutdownNow();
@@ -451,8 +458,13 @@ public class TransactionManager {
                     throw new RMNotAliveException();
                 }
             } catch (ExecutionException e) {
-                e.printStackTrace();
-                System.out.println(e.getCause());
+                try {
+                    Thread.sleep(5000);
+                }catch (Exception ee){
+
+                }
+//                e.printStackTrace();
+//                System.out.println(e.getCause());
             } catch (Exception e) {
                 System.out.println("Concurrent Exception");
             }finally {
