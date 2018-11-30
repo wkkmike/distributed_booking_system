@@ -84,6 +84,7 @@ public class ResourceManager implements IMiddleware
 			e.printStackTrace();
 			System.exit(1);
 		}
+		return;
 	}
 
 	public void reconnect(){
