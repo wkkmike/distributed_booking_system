@@ -483,7 +483,7 @@ public abstract class Client
 					String name = arguments.elementAt(1);
 					int mode = toInt(arguments.elementAt(2));
 					m_resourceManager.crashResourceManager(name,mode);
-					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2) + "success");
+					System.out.println("crash server"+ arguments.elementAt(1) +"in mode "+ arguments.elementAt(2) + " success");
 					break;
 				}
 

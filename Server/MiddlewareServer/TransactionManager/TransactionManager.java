@@ -437,6 +437,7 @@ public class TransactionManager {
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.schedule(new Runnable() {
                         public void run() {
+                            System.out.println("here");
                             System.exit(1);
                         }
                     }, TIMEOUT, TimeUnit.MILLISECONDS);
