@@ -77,6 +77,7 @@ public class TransactionManager {
             }
         }
         else{
+            middleware.reconnect();
             recovery();
         }
     }
