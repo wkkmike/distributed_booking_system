@@ -24,7 +24,7 @@ public class TransactionManager {
     private boolean rmF = true;
     private boolean rmCus = true;
     private boolean alive = true;
-    private List<Integer> transactionStatusList = new ArrayList<>();
+    private ArrayList<Integer> transactionStatusList = new ArrayList<>();
     private int timeoutInSec = 5;
     private long timeoutForRetry = 45000;
     private boolean flag1 = true;
@@ -615,7 +615,7 @@ public class TransactionManager {
         try {
             FileInputStream fileIn = new FileInputStream(name);
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            transactionStatusList = (List<Integer>) in.readObject();
+            transactionStatusList = (ArrayList<Integer>) in.readObject();
             in.close();
             fileIn.close();
             System.out.printf("Serialized data is load from " + name + " .\n");
