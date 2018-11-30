@@ -310,7 +310,16 @@ public class TransactionManager {
                 line = logReader.readLine();
             }
             Iterator it = logHashMap.entrySet().iterator();
+            int count = 0;
             while (it.hasNext()) {
+                count++;
+                File crash = new File("./crash");
+                if(count == 2) {
+                    if (crash.exists()) {
+                        crash.deleteOnExit();
+                        System.exit(1);
+                    }
+                }
                 Map.Entry pair = (Map.Entry)it.next();
                 int xid =  Integer.parseInt((String) pair.getKey());
                 String status = (String) pair.getValue();
@@ -347,9 +356,6 @@ public class TransactionManager {
                     }
                 }
                 it.remove();
-                File crash = new File("./crash");
-                if(crash.exists())
-                    System.exit(1);
             }
         }
         catch(IOException e){
