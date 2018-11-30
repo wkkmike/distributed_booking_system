@@ -738,10 +738,20 @@ public class ResourceManager implements IResourceManager
 					}
 					else{
 						if(masterIsA) {
-							load(fileAName);
+							load(fileBName);
+							masterIsA = false;
+							FileWriter masterWriter = new FileWriter(masterRecordName, false);
+							masterWriter.write(Integer.toString(xid) + " B");
+							masterWriter.flush();
+							masterWriter.close();
 						}
 						else {
 							load(fileBName);
+							masterIsA = true;
+							FileWriter masterWriter = new FileWriter(masterRecordName, false);
+							masterWriter.write(Integer.toString(xid) + " A");
+							masterWriter.flush();
+							masterWriter.close();
 						}
 						write2log(Integer.toString(xid) + " C");
 					}
