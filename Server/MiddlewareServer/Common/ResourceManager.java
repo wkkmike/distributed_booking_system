@@ -950,7 +950,7 @@ public class ResourceManager implements IMiddleware
 				if (!m_resourceManager_cus.checkCustomer(xid, customerID))
 					return false;
 				TM.addRM(xid, Transaction.RM.RM_C);
-				ReservableItem car = m_resourceManager_f.getCar(xid, location);
+				ReservableItem car = m_resourceManager_c.getCar(xid, location);
 				if (!m_resourceManager_c.reserveCar(xid, customerID, location))
 					return false;
 				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Car, car));
@@ -1002,7 +1002,7 @@ public class ResourceManager implements IMiddleware
 				if (!m_resourceManager_cus.checkCustomer(xid, customerID))
 					return false;
 				TM.addRM(xid, Transaction.RM.RM_R);
-				ReservableItem room = m_resourceManager_f.getRoom(xid, location);
+				ReservableItem room = m_resourceManager_r.getRoom(xid, location);
 				if (!m_resourceManager_r.reserveRoom(xid, customerID, location))
 					return false;
 				TM.addUndoOperation(xid, new undoOperation(undoOperation.undoCommandType.Set_Room, room));
