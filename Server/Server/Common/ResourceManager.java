@@ -759,7 +759,8 @@ public class ResourceManager implements IResourceManager
 				if(status.equals("A"))
 					continue;
 				it.remove();
-				if(!flag5)
+				File crash = new File("./crash");
+				if(crash.exists())
 					System.exit(1);
 			}
 		}
@@ -941,6 +942,15 @@ public class ResourceManager implements IResourceManager
 			}
 			case 5:{
 				flag5 = false;
+				File crash = new File("./crash");
+				if(!crash.exists()) {
+					try {
+						crash.createNewFile();
+					}
+					catch (IOException e){
+						System.out.println("Can't create crash file");
+					}
+				}
 				break;
 			}
 		}
@@ -952,6 +962,9 @@ public class ResourceManager implements IResourceManager
 		flag2 = true;
 		flag3 = true;
 		flag4 = true;
+		flag5 = true;
+		File crash = new File("./crash");
+		crash.deleteOnExit();
 		return;
 	}
 }

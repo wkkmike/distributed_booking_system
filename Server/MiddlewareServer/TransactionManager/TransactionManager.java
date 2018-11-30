@@ -344,7 +344,8 @@ public class TransactionManager {
                     }
                 }
                 it.remove();
-                if(!flag8)
+                File crash = new File("./crash");
+                if(crash.exists())
                     System.exit(1);
             }
         }
@@ -674,6 +675,15 @@ public class TransactionManager {
             }
             case 8:{
                 flag8 = false;
+                File crash = new File("./crash");
+                if(!crash.exists()) {
+                    try {
+                        crash.createNewFile();
+                    }
+                    catch (IOException e){
+                        System.out.println("Can't create crash file");
+                    }
+                }
                 break;
             }
         }
@@ -689,6 +699,8 @@ public class TransactionManager {
         flag6 = true;
         flag7 = true;
         flag8 = true;
+        File crash = new File("./crash");
+        crash.deleteOnExit();
         return;
     }
 }
