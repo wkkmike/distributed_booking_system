@@ -180,13 +180,13 @@ public class TransactionManager {
                 System.out.println("Can't write to " + masterName);
             }
         }
-        if(!flag5)
-            System.exit(1);
         transactionStatusList.add(new Integer(transactionId));
         write2log(transactionId + " C");
 
         if(transaction.commit()){
             // send result to all participant.
+            if(!flag5)
+                System.exit(1);
             try {
                 sendResult(transactionId, true);
             }
