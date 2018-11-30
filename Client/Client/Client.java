@@ -3,7 +3,6 @@ package Client;
 import MiddlewareServer.Interface.IMiddleware;
 
 
-
 import java.util.*;
 import java.io.*;
 import java.rmi.RemoteException;
@@ -438,7 +437,24 @@ public abstract class Client
 					System.out.println("Commit transaction [xid=" + arguments.elementAt(1) + "]");
 
 					int xid = toInt(arguments.elementAt(1));
-					if(m_resourceManager.commit(xid)){
+					boolean commitFlag = true;
+
+					try{
+						commitFlag = m_resourceManager.commit(xid);
+					}
+					catch (RemoteException e){
+						System.out.println("Commit xid:" + xid + ", encounter some problem.");
+						throw e;
+					}
+					catch (IllegalArgumentException e){
+						throw e;
+					}
+					catch (Exception e){
+						System.out.println("Commit xid:" + xid + ", failed.");
+						throw e;
+					}
+
+					if(commitFlag){
 						System.out.println("Commit xid:" + xid + ", success");
 					}
 					else{
