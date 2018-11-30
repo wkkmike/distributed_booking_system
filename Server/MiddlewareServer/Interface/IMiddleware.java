@@ -229,4 +229,10 @@ public interface IMiddleware extends Remote
     public boolean isAbort(int xid) throws RemoteException;
 
     public void abortRequest(int xid) throws RemoteException;
+
+    public void crashResourceManager(String rm, int mode) throws RemoteException;
+
+    public void crashMiddleware(int mode) throws RemoteException;
+
+    public void resetCrashes() throws RemoteException;
 }

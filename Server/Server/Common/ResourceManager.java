@@ -14,6 +14,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 import java.rmi.RemoteException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ResourceManager implements IResourceManager
 {
@@ -31,7 +34,12 @@ public class ResourceManager implements IResourceManager
 	private static int s_serverPort = 1099;
 	private static String s_serverName = "MiddlewareServer";
 	private static String s_rmiPrefix = "group15";
-
+	private boolean flag1 = true;
+	private boolean flag2 = true;
+	private boolean flag3 = true;
+	private boolean flag4 = true;
+	private boolean flag5 = true;
+	private final long TIMEOUT = 10;
 	public ResourceManager(String p_name)
 	{
 		m_name = p_name;
@@ -741,6 +749,8 @@ public class ResourceManager implements IResourceManager
 				if(status.equals("A"))
 					continue;
 				it.remove();
+				if(!flag5)
+					System.exit(1);
 			}
 		}
 		catch(IOException e){
@@ -768,6 +778,8 @@ public class ResourceManager implements IResourceManager
 	public boolean prepareCommit(int xid) throws RemoteException{
 		if(!dataHashMap.containsKey(xid))
 			return true;
+		if(!flag1)
+			System.exit(1);
 		if(masterIsA){
 			if(!save(fileBName, xid)){
 				System.out.println("RM:: Can't save data to disk, abort transaction <" + xid +">");
@@ -784,6 +796,16 @@ public class ResourceManager implements IResourceManager
 		}
 		System.out.println("RM:: Save the data to disk, vote yes for transaction <" + xid + ">");
 		write2log(Integer.toString(xid) + " Y");
+		if(!flag2)
+			System.exit(1);
+		if(!flag3){
+			ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+			scheduler.schedule(new Runnable() {
+				public void run() {
+						System.exit(1);
+					}
+			}, TIMEOUT, TimeUnit.MILLISECONDS);
+		}
 		return true;
 	}
 
@@ -795,6 +817,8 @@ public class ResourceManager implements IResourceManager
 			RMHashMap oldm_data = (RMHashMap) m_data.clone();
 			m_data = (RMHashMap) dataHashMap.get(xid).clone();
 			dataHashMap.remove(xid);
+			if(!flag4)
+				System.exit(1);
 			if(masterIsA) {
 				masterIsA = false;
 				try {
@@ -809,7 +833,6 @@ public class ResourceManager implements IResourceManager
 				}
 			}
 			else {
-				System.out.println("8");
 				masterIsA = true;
 				try {
 					FileWriter masterWriter = new FileWriter(masterRecordName, false);
@@ -884,6 +907,40 @@ public class ResourceManager implements IResourceManager
 			e.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+	public void crashResourceManager(int mode) throws RemoteException{
+		switch (mode){
+			case 1:{
+				flag1 = false;
+				break;
+			}
+			case 2:{
+				flag2 = false;
+				break;
+			}
+			case 3:{
+				flag3 = false;
+				break;
+			}
+			case 4:{
+				flag4 = false;
+				break;
+			}
+			case 5:{
+				flag5 = false;
+				break;
+			}
+		}
+		return;
+	}
+
+	public void resetCrashes() throws RemoteException{
+		flag1 = true;
+		flag2 = true;
+		flag3 = true;
+		flag4 = true;
+		return;
 	}
 }
  

@@ -1360,5 +1360,36 @@ public class ResourceManager implements IMiddleware
 	public boolean isAlive(){
 		return TM.isAlive();
 	}
+
+	public void crashResourceManager(String rm, int mode) throws RemoteException{
+		if (rm.equals("customers")) {
+			m_resourceManager_cus.crashResourceManager(mode);
+		}
+		if (rm.equals("cars")) {
+			m_resourceManager_c.crashResourceManager(mode);
+		}
+		if (rm.equals("flights")) {
+			m_resourceManager_f.crashResourceManager(mode);
+		}
+		if (rm.equals("rooms")) {
+			m_resourceManager_r.crashResourceManager(mode);
+		}
+		Trace.info("MW: Resource Manager: " + rm + " crash mode: " + mode + " set.");
+	}
+
+	public void crashMiddleware(int mode) throws RemoteException{
+		TM.crashMiddleware(mode);
+		return;
+	}
+
+	public void resetCrashes() throws RemoteException{
+		TM.resetCrashes();
+		m_resourceManager_r.resetCrashes();
+		m_resourceManager_f.resetCrashes();
+		m_resourceManager_r.resetCrashes();
+		m_resourceManager_cus.resetCrashes();
+		Trace.info("MW: TM and RM reset crashed");
+		return;
+	}
 }
  

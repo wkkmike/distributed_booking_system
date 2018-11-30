@@ -27,6 +27,15 @@ public class TransactionManager {
     private List<Integer> transactionStatusList = new ArrayList<>();
     private int timeoutInSec = 5;
     private long timeoutForRetry = 45000;
+    private boolean flag1 = true;
+    private boolean flag2 = true;
+    private boolean flag3 = true;
+    private boolean flag4 = true;
+    private boolean flag5 = true;
+    private boolean flag6 = true;
+    private boolean flag7 = true;
+    private boolean flag8 = true;
+    private final long TIMEOUT = 1;
 
     public TransactionManager(){
         xid = 1;
@@ -100,9 +109,12 @@ public class TransactionManager {
         // Write start 2PC
         write2log(Integer.toString(transactionId) + " S");
 
+        if(!flag1)
+            System.exit(1);
         // Send vote request to all participant
         if(prepareCommit(transactionId)) {
-
+            if(!flag4)
+                System.exit(1);
             // receive all decision, than commit.
             if(masterIsA){
                 if(!save(fileBName)){
@@ -122,6 +134,8 @@ public class TransactionManager {
         }
         // some participant vote no, abort the transaction
         else {
+            if(!flag5)
+                System.exit(1);
             // abort the transaction.
             transactionList.remove(transactionId);
             write2log(Integer.toString(transactionId) + " A");
@@ -153,7 +167,8 @@ public class TransactionManager {
                 System.out.println("Can't write to " + masterName);
             }
         }
-
+        if(!flag5)
+            System.exit(1);
         transactionStatusList.add(transactionId);
         write2log(transactionId + " C");
 
@@ -168,6 +183,7 @@ public class TransactionManager {
             finally {
                 transactionList.remove(transactionId);
             }
+
             return true;
         }
 
@@ -316,6 +332,8 @@ public class TransactionManager {
                     }
                 }
                 it.remove();
+                if(!flag8)
+                    System.exit(1);
             }
         }
         catch(IOException e){
@@ -368,6 +386,8 @@ public class TransactionManager {
                         return false;
                     }
                 }
+                if(!flag3)
+                    System.exit(1);
             }
         }
         catch (RMNotAliveException e){
@@ -413,6 +433,14 @@ public class TransactionManager {
 
         while(true) {
             try {
+                if(!flag2){
+                    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                    scheduler.schedule(new Runnable() {
+                        public void run() {
+                            System.exit(1);
+                        }
+                    }, TIMEOUT, TimeUnit.MILLISECONDS);
+                }
                 return handler.get(timeoutInSec * 1000, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 handler.cancel(true);
@@ -470,7 +498,11 @@ public class TransactionManager {
                         return false;
                     }
                 }
+                if (!flag6)
+                    System.exit(1);
             }
+            if(!flag7)
+                System.exit(1);
         System.out.println("TM::all participant RM receive yes vote for <" + xid + ">");
         return true;
     }
@@ -560,5 +592,55 @@ public class TransactionManager {
         if(transaction == null)
             return false;
         return transaction.hasRm(rm);
+    }
+
+    public void crashMiddleware(int mode){
+        switch (mode){
+            case 1:{
+                flag1 = false;
+                break;
+            }
+            case 2:{
+                flag2 = false;
+                break;
+            }
+            case 3:{
+                flag3 = false;
+                break;
+            }
+            case 4:{
+                flag4 = false;
+                break;
+            }
+            case 5:{
+                flag5 = false;
+                break;
+            }
+            case 6:{
+                flag6 = false;
+                break;
+            }
+            case 7:{
+                flag7 = false;
+                break;
+            }
+            case 8:{
+                flag8 = false;
+                break;
+            }
+        }
+        return;
+    }
+
+    public void resetCrashes(){
+        flag1 = true;
+        flag2 = true;
+        flag3 = true;
+        flag4 = true;
+        flag5 = true;
+        flag6 = true;
+        flag7 = true;
+        flag8 = true;
+        return;
     }
 }
