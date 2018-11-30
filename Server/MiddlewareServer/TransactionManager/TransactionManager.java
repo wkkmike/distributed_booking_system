@@ -413,22 +413,11 @@ public class TransactionManager {
     }
 
     private boolean timeoutSendResult(int transactionId, String rm, boolean result, long startTime)throws RMNotAliveException{
-        while(true) {
-            try {
-                return middleware.sendResult(transactionId, rm, result);
-            } catch (Exception e) {
-                long nowTime = new Date().getTime();
-                if (nowTime - startTime > timeoutForRetry) {
-                    alive = false;
-                    throw new RMNotAliveException();
-                }
-                try {
-                    Thread.sleep(5000);
-                }catch (Exception ee){
-
-                }
-                System.out.println("TM:: Retry send result");
-            }
+        try {
+            return middleware.sendResult(transactionId, rm, result);
+        } catch (Exception e) {
+            alive = false;
+            throw new RMNotAliveException();
         }
     }
 
